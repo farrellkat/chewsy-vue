@@ -4,11 +4,22 @@ import categoriesJSON from '../../categories.json'
 export default {
   name: 'category-search',
   props: ['manualInput'],
+
   data() {
+    const all = categoriesJSON.filter(x => x.parents.find(y => y === 'food' || y === 'restaurants'))
+    let filtered = all.reduce((a, c) => {
+      if (
+        (c.country_whitelist?.find(x => x === 'US') && c.country_blacklist?.find(y => y === 'US') === undefined) ||
+        c.country_whitelist === undefined
+      ) {
+        a.push(c)
+      }
+      return a
+    }, [])
     return {
       term: '',
       categoriesJSON,
-      suggestions: null,
+      suggestions: filtered,
       categories: [],
       manualLocation: '',
       radius: null,
@@ -102,8 +113,11 @@ export default {
   }
   & input {
     border: 1px solid pink;
-    border-radius: 20px;
+    border-radius: 30px;
     padding: 0.5rem;
+    flex-basis: 50%;
+    font-size: 2rem;
+    text-indent: 1rem;
   }
   & /deep/ input:focus {
     border: 1px solid cadetblue;
@@ -113,16 +127,16 @@ export default {
     display: flex;
     margin: auto;
     justify-content: space-between;
-    width: 20rem;
-    padding-bottom: 1rem;
+    padding: 0rem 2rem 1rem 2rem;
     align-items: center;
     & button {
-      border: 1px solid pink;
-      padding: 0.5rem;
-      border-radius: 10%;
+      border: 2px solid pink;
+      padding: 1rem 2rem;
+      border-radius: 4px;
       color: pink;
       font-family: helvetica;
       font-weight: bold;
+      font-size: 1rem;
     }
     & button:hover {
       background-color: pink;
@@ -132,7 +146,6 @@ export default {
   }
   & .suggestions {
     display: flex;
-    width: 60rem;
     justify-content: space-evenly;
     margin: auto;
     flex-wrap: wrap;

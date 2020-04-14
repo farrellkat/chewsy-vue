@@ -109,6 +109,9 @@ export default Home
   .home
     categorySearch(@search="(val) => getLocationAndSearch(val)" :manualInput="this.manualInput")
     cardView(:restaurant="this.restaurant" :image="this.image" @next="getLocationAndSearch")
-    
-      
 </template>
+<style lang="postcss" scoped>
+.home {
+  padding: 2rem 20rem;
+}
+</style>
