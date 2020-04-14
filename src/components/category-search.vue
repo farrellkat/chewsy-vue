@@ -1,27 +1,23 @@
 <script>
-import axios from 'axios'
 import categoriesJSON from '../../categories.json'
+import axios from 'axios'
 
 export default {
-  name: 'HelloWorld',
-  props: {},
+  name: 'category-search',
   data() {
     return {
-      categoriesJSON,
-      term: '',
       yelp: process.env.VUE_APP_YELP,
       api: process.env.VUE_APP_API,
       latitude: '',
       longitude: '',
-      radius: null,
-      restaurant: null,
-      image: null,
+      term: '',
+      categoriesJSON,
+      suggestions: null,
+      categories: [],
       manualInput: false,
       manualLocation: '',
       totalRestaurants: null,
-      category: null,
-      categories: [],
-      suggestions: null,
+      radius: null,
       options: [
         { string: 'Choose one', value: null },
         { string: '1 mile', value: 1609 },
@@ -47,9 +43,13 @@ export default {
     },
   },
   methods: {
+    addCategory(alias, index) {
+      this.categories.push(alias)
+      this.suggestions.splice(index, 1)
+    },
     autocomplete() {
       const vm = this
-      if (vm.term.length >= 3) {
+      if (vm.term.length >= 1) {
         let filterWithoutSelected = vm.filterCategories.reduce((a, c) => {
           if (vm.categories.find(x => x.alias === c.alias) === undefined) {
             a.push(c)
@@ -64,10 +64,6 @@ export default {
         }, [])
         vm.suggestions = prediction
       }
-    },
-    addCategory(alias, index) {
-      this.categories.push(alias)
-      this.suggestions.splice(index, 1)
     },
     searchYelp(res) {
       const vm = this
@@ -141,60 +137,24 @@ export default {
   },
 }
 </script>
-
 <template lang="pug">
-  .search
-    .selected-categories(v-for="(selected,index) in categories")
-      .pill {{ selected.title }}
-    .search-form
-      label(for="search") Search
-      input(id="search" v-model="term" @input="autocomplete" v-lowercase)
-      button(@click="getLocationAndSearch") Submit
-    .categories
-      label(for="category-select")
-        select(v-model="category" id="category-select")
-          option(v-for="category in filterCategories" :value="category.alias") {{ category.title}}
-    .radius 
-      label(for="radius") Radius
-        select(v-model="radius" id="radius")
-          option(v-for="option in options" :value="option.value") {{ option.string }}
-    .manual-input(v-if="manualInput")
-      label(for='city-input') Location
-      input(id='city-input' v-model="manualLocation")
-    .suggestions(v-for="(suggestion, index) in suggestions")
-      .pill(@click="addCategory(suggestion, index)") {{ suggestion.title }}
-    .restaurant-info(v-if="restaurant") 
-      h1 {{ restaurant.name }}
-      h4 {{ restaurant.price}}
-      span(v-for="address in restaurant.location.display_address")
-        span {{ address }}
-        br
-      a(:href="`tel:${restaurant.phone}`") {{ restaurant.display_phone }}
-      span(v-touch:swipe="swipeHandler")
-        img(:src="image")
-      
-
-    
+.category-search Hello from search component
+  .selected-categories(v-for="(selected,index) in categories")
+    .pill {{ selected.title }}
+  .search-form
+    label(for="search") Search
+    input(id="search" v-model="term" @input="autocomplete" v-lowercase)
+  .suggestions(v-for="(suggestion, index) in suggestions")
+    .pill(@click="addCategory(suggestion, index)") {{ suggestion.title }}
+  .radius 
+    label(for="radius") Radius
+      select(v-model="radius" id="radius")
+        option(v-for="option in options" :value="option.value") {{ option.string }}
+  .manual-input(v-if="manualInput")
+    label(for='city-input') Location
+    input(id='city-input' v-model="manualLocation")
 </template>
-
-<!-- Add "scoped" attribute to limit CSS to this component only -->
-<style scoped>
-.restaurant-info {
-  width: 10rem;
-  margin: auto;
-}
-h3 {
-  margin: 40px 0 0;
-}
-ul {
-  list-style-type: none;
-  padding: 0;
-}
-li {
-  display: inline-block;
-  margin: 0 10px;
-}
-a {
-  color: #42b983;
+<style lang="postcss" scoped>
+.search {
 }
 </style>
