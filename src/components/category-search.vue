@@ -13,7 +13,7 @@ export default {
       manualLocation: '',
       radius: null,
       options: [
-        { string: 'Choose one', value: null },
+        { string: 'Radius', value: null },
         { string: '1 mile', value: 1609 },
         { string: '3 miles', value: 1609 * 3 },
         { string: '5 miles', value: 1609 * 5 },
@@ -49,6 +49,10 @@ export default {
       this.categories.push(alias)
       this.suggestions.splice(index, 1)
     },
+    removeCategory(selected, index) {
+      this.categories.splice(index, 1)
+      this.suggestions.unshift(selected)
+    },
     autocomplete() {
       const vm = this
       if (vm.term.length >= 1) {
@@ -71,24 +75,89 @@ export default {
 }
 </script>
 <template lang="pug">
-.category-search Hello from search component
-  .selected-categories(v-for="(selected,index) in categories")
-    .pill {{ selected.title }}
+.category-search
   .search-form
-    label(for="search") Search
-    input(id="search" v-model="term" @input="autocomplete" v-lowercase)
-  .suggestions(v-for="(suggestion, index) in suggestions")
-    .pill(@click="addCategory(suggestion, index)") {{ suggestion.title }}
-  .radius 
-    label(for="radius") Radius
+    input(id="search" autocomplete="off" v-model="term" @input="autocomplete" placeholder="Search categories" v-lowercase)
+    .radius 
       select(v-model="radius" id="radius")
         option(v-for="option in options" :value="option.value") {{ option.string }}
-  .manual-input(v-if="manualInput")
-    label(for='city-input') Location
-    input(id='city-input' v-model="manualLocation")
-  button(@click="searchYelp") search
+    button(@click="searchYelp") search
+    .manual-input(v-if="manualInput")
+      label(for='city-input') Location
+      input(id='city-input' v-model="manualLocation")
+  h1(v-if="categories.length") Show me
+  .selected-categories
+    template(v-for="(selected,index) in categories")
+      .pill(@click="removeCategory(selected,index)") {{ selected.title }}
+        .close x
+  h1(v-if="location") in {{ location }}
+  .suggestions
+    template(v-for="(suggestion, index) in suggestions")
+      .pill(@click="addCategory(suggestion, index)") {{ suggestion.title }}
 </template>
 <style lang="postcss" scoped>
-.search {
+.category-search {
+  & h1 {
+    margin: 0 0 1rem 0;
+  }
+  & input {
+    border: 1px solid pink;
+    border-radius: 20px;
+    padding: 0.5rem;
+  }
+  & /deep/ input:focus {
+    border: 1px solid cadetblue;
+    outline: none;
+  }
+  & .search-form {
+    display: flex;
+    margin: auto;
+    justify-content: space-between;
+    width: 20rem;
+    padding-bottom: 1rem;
+    align-items: center;
+    & button {
+      border: 1px solid pink;
+      padding: 0.5rem;
+      border-radius: 10%;
+      color: pink;
+      font-family: helvetica;
+      font-weight: bold;
+    }
+    & button:hover {
+      background-color: pink;
+      color: white;
+      cursor: pointer;
+    }
+  }
+  & .suggestions {
+    display: flex;
+    width: 60rem;
+    justify-content: space-evenly;
+    margin: auto;
+    flex-wrap: wrap;
+    padding: 2rem;
+    border: 4px solid pink;
+    border-radius: 15px;
+  }
+  & .pill {
+    padding: 1rem;
+    margin: 0.5rem;
+    background-color: pink;
+    border-radius: 20px;
+    display: flex;
+    & .close {
+      margin-left: 1rem;
+    }
+  }
+  & .pill:hover {
+    cursor: pointer;
+  }
+  & .selected-categories {
+    display: flex;
+    margin: auto;
+    justify-content: center;
+    padding-bottom: 2rem;
+  }
 }
 </style>
