@@ -1,22 +1,16 @@
 <script>
 import categoriesJSON from '../../categories.json'
-import axios from 'axios'
 
 export default {
   name: 'category-search',
+  props: ['manualInput'],
   data() {
     return {
-      yelp: process.env.VUE_APP_YELP,
-      api: process.env.VUE_APP_API,
-      latitude: '',
-      longitude: '',
       term: '',
       categoriesJSON,
       suggestions: null,
       categories: [],
-      manualInput: false,
       manualLocation: '',
-      totalRestaurants: null,
       radius: null,
       options: [
         { string: 'Choose one', value: null },
@@ -43,6 +37,14 @@ export default {
     },
   },
   methods: {
+    searchYelp() {
+      const search = {
+        categories: this.categories,
+        radius: this.radius,
+        manualLocation: this.manualLocation,
+      }
+      this.$emit('search', search)
+    },
     addCategory(alias, index) {
       this.categories.push(alias)
       this.suggestions.splice(index, 1)
@@ -65,75 +67,6 @@ export default {
         vm.suggestions = prediction
       }
     },
-    searchYelp(res) {
-      const vm = this
-      const categoryArray = []
-      vm.categories.map(x => categoryArray.push(x.alias))
-      let categoryString = categoryArray.join(',')
-      let location = {}
-      if (res !== null) {
-        const position = res
-        vm.latitude = position.coords.latitude
-        vm.longitude = position.coords.longitude
-        location = { latitude: vm.latitude, longitude: vm.longitude }
-      } else {
-        location = { location: vm.manualLocation }
-      }
-      return axios
-        .get(vm.api, {
-          params: {
-            ...location,
-            radius: vm.radius,
-            categories: categoryString,
-          },
-          headers: {
-            Authorization: `Bearer ${vm.yelp}`,
-          },
-        })
-        .then(function(response) {
-          response.data.total >= 1000 ? (vm.totalRestaurants = 999) : (vm.totalRestaurants = response.data.total)
-          const offset = Math.floor(Math.random() * vm.totalRestaurants + 1)
-          return axios.get(vm.api, {
-            params: {
-              ...location,
-              radius: vm.radius,
-              categories: categoryString,
-              offset: offset,
-              limit: 1,
-            },
-            headers: {
-              Authorization: `Bearer ${vm.yelp}`,
-            },
-          })
-        })
-        .then(response => {
-          if (response.data.businesses.length) {
-            vm.restaurant = response.data.businesses[0]
-            vm.image = response.data.businesses[0].image_url
-          } else {
-            vm.searchYelp
-          }
-        })
-        .catch(function(error) {
-          console.log(error)
-        })
-    },
-    async getLocationAndSearch() {
-      return new Promise(function(resolve, reject) {
-        navigator.geolocation.getCurrentPosition(resolve, reject)
-      })
-        .then(resolve => {
-          this.searchYelp(resolve)
-        })
-        .catch(_reject => {
-          if (!this.manualInput) {
-            window.alert('Could not find your location')
-            this.manualInput = true
-          } else {
-            this.searchYelp(null)
-          }
-        })
-    },
   },
 }
 </script>
@@ -153,6 +86,7 @@ export default {
   .manual-input(v-if="manualInput")
     label(for='city-input') Location
     input(id='city-input' v-model="manualLocation")
+  button(@click="searchYelp") search
 </template>
 <style lang="postcss" scoped>
 .search {

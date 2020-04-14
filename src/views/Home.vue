@@ -1,23 +1,26 @@
 <script>
-import axios from 'axios'
 import VueTidyRoutes from 'vue-tidyroutes'
 import categorySearch from '../components/category-search'
+import cardView from '../components/card-view'
+import axios from 'axios'
 
 let Home = {
   name: 'home',
   components: {
     categorySearch: categorySearch,
+    cardView: cardView,
   },
   data() {
     return {
-      categoriesJSON,
-      term: '',
       yelp: process.env.VUE_APP_YELP,
       api: process.env.VUE_APP_API,
-      latitude: '',
-      longitude: '',
       restaurant: null,
       image: null,
+      latitude: '',
+      longitude: '',
+      totalRestaurants: null,
+      search: {},
+      manualInput: false,
     }
   },
   computed: {},
@@ -25,7 +28,7 @@ let Home = {
     searchYelp(res) {
       const vm = this
       const categoryArray = []
-      vm.categories.map(x => categoryArray.push(x.alias))
+      vm.search.categories.map(x => categoryArray.push(x.alias))
       let categoryString = categoryArray.join(',')
       let location = {}
       if (res !== null) {
@@ -34,13 +37,13 @@ let Home = {
         vm.longitude = position.coords.longitude
         location = { latitude: vm.latitude, longitude: vm.longitude }
       } else {
-        location = { location: vm.manualLocation }
+        location = { location: vm.search.manualLocation }
       }
       return axios
         .get(vm.api, {
           params: {
             ...location,
-            radius: vm.radius,
+            radius: vm.search.radius,
             categories: categoryString,
           },
           headers: {
@@ -53,7 +56,7 @@ let Home = {
           return axios.get(vm.api, {
             params: {
               ...location,
-              radius: vm.radius,
+              radius: vm.search.radius,
               categories: categoryString,
               offset: offset,
               limit: 1,
@@ -75,7 +78,8 @@ let Home = {
           console.log(error)
         })
     },
-    async getLocationAndSearch() {
+    async getLocationAndSearch(search) {
+      search ? (this.search = search) : {}
       return new Promise(function(resolve, reject) {
         navigator.geolocation.getCurrentPosition(resolve, reject)
       })
@@ -102,16 +106,9 @@ export default Home
 </script>
 
 <template lang="pug">
-  .search
-    categorySearch
-    .restaurant-info(v-if="restaurant") 
-      h1 {{ restaurant.name }}
-      h4 {{ restaurant.price}}
-      span(v-for="address in restaurant.location.display_address")
-        span {{ address }}
-        br
-      a(:href="`tel:${restaurant.phone}`") {{ restaurant.display_phone }}
-      span(v-touch:swipe="swipeHandler")
-        img(:src="image")
+  .home
+    categorySearch(@search="(val) => getLocationAndSearch(val)" :manualInput="this.manualInput")
+    cardView(:restaurant="this.restaurant" :image="this.image" @next="getLocationAndSearch")
+    
       
 </template>

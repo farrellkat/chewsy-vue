@@ -3,7 +3,6 @@ import App from './App.vue'
 import store from './store'
 import axios from 'axios'
 import VueAxios from 'vue-axios'
-import Vue2TouchEvents from 'vue2-touch-events'
 import VueTidyRoutes from 'vue-tidyroutes'
 import VueRouter from 'vue-router'
 
@@ -11,7 +10,6 @@ import './views/home'
 import './components/category-search'
 
 Vue.use(VueAxios, axios)
-Vue.use(Vue2TouchEvents)
 Vue.use(VueRouter)
 
 Vue.directive('lowercase', {
