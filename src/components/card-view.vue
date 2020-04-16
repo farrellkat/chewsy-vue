@@ -27,6 +27,9 @@ export default {
 .card-view {
   width: 18rem;
   margin: auto;
+  & .image-holder {
+    border-radius: 15px;
+  }
   & .restaurant-info,
   & .image-holder,
   & img {
@@ -35,11 +38,11 @@ export default {
 
   & .restaurant-info {
     padding: 2rem;
-    border: 2px solid teal;
-    border-radius: 4px;
+    border: 4px solid pink;
+    border-radius: 15px;
   }
   & .price,
-  & .name  {
+  & .name {
     text-align: left;
   }
   & .address {

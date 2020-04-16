@@ -18,13 +18,13 @@ export default {
     }, [])
     return {
       term: '',
+      filtered: filtered,
       categoriesJSON,
       suggestions: filtered,
       categories: [],
       manualLocation: '',
       radius: null,
       options: [
-        { string: 'Radius', value: null },
         { string: '1 mile', value: 1609 },
         { string: '3 miles', value: 1609 * 3 },
         { string: '5 miles', value: 1609 * 5 },
@@ -32,22 +32,13 @@ export default {
       ],
     }
   },
-  computed: {
-    filterCategories() {
-      const all = this.categoriesJSON.filter(x => x.parents.find(y => y === 'food' || y === 'restaurants'))
-      let filtered = all.reduce((a, c) => {
-        if (
-          (c.country_whitelist?.find(x => x === 'US') && c.country_blacklist?.find(y => y === 'US') === undefined) ||
-          c.country_whitelist === undefined
-        ) {
-          a.push(c)
-        }
-        return a
-      }, [])
-      return filtered
-    },
-  },
   methods: {
+    active(val) {
+      return val === this.radius ? 'active' : ''
+    },
+    selectRadius(val) {
+      this.radius = val
+    },
     searchYelp() {
       const search = {
         categories: this.categories,
@@ -67,7 +58,7 @@ export default {
     autocomplete() {
       const vm = this
       if (vm.term.length >= 1) {
-        let filterWithoutSelected = vm.filterCategories.reduce((a, c) => {
+        let filterWithoutSelected = vm.filtered.reduce((a, c) => {
           if (vm.categories.find(x => x.alias === c.alias) === undefined) {
             a.push(c)
           }
@@ -83,6 +74,13 @@ export default {
       }
     },
   },
+  watch: {
+    term() {
+      if (this.term === '') {
+        this.suggestions = this.filtered
+      }
+    },
+  },
 }
 </script>
 <template lang="pug">
@@ -90,8 +88,9 @@ export default {
   .search-form
     input(id="search" autocomplete="off" v-model="term" @input="autocomplete" placeholder="Search categories" v-lowercase)
     .radius 
-      select(v-model="radius" id="radius")
-        option(v-for="option in options" :value="option.value") {{ option.string }}
+      template(v-for="option in options")
+        .circle.hover(@click="selectRadius(option.value)" :class="active(option.value)")
+          .circle-name {{ option.string }}
     button(@click="searchYelp") search
     .manual-input(v-if="manualInput")
       label(for='city-input') Location
@@ -101,7 +100,7 @@ export default {
     template(v-for="(selected,index) in categories")
       .pill(@click="removeCategory(selected,index)") {{ selected.title }}
         .close x
-  h1(v-if="location") in {{ location }}
+  //- h1(v-if="location") in {{ location }}
   .suggestions
     template(v-for="(suggestion, index) in suggestions")
       .pill(@click="addCategory(suggestion, index)") {{ suggestion.title }}
@@ -115,7 +114,7 @@ export default {
     border: 1px solid pink;
     border-radius: 30px;
     padding: 0.5rem;
-    flex-basis: 50%;
+    flex-basis: 30%;
     font-size: 2rem;
     text-indent: 1rem;
   }
@@ -171,6 +170,34 @@ export default {
     margin: auto;
     justify-content: center;
     padding-bottom: 2rem;
+  }
+  & .radius {
+    flex-basis: 70%;
+    display: flex;
+    justify-content: space-evenly;
+    & .circle {
+      height: 75px;
+      width: 75px;
+      border-radius: 50%;
+      color: black;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    & .circle:hover:not(.active) {
+      /* border: 1px solid pink; */
+      background-color: rgb(255, 248, 249);
+    }
+    & .circle-name {
+    }
+  }
+  & .hover {
+    cursor: pointer;
+  }
+  & .circle.active {
+    background: pink;
+    border: none;
+    color: white;
   }
 }
 </style>

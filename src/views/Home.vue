@@ -14,6 +14,7 @@ let Home = {
     return {
       yelp: process.env.VUE_APP_YELP,
       api: process.env.VUE_APP_API,
+      processing: false,
       restaurant: null,
       image: null,
       latitude: '',
@@ -25,6 +26,9 @@ let Home = {
   },
   computed: {},
   methods: {
+    newSearch() {
+      ;(this.restaurant = null), (this.image = null), (this.search = {})
+    },
     searchYelp(res) {
       const vm = this
       const categoryArray = []
@@ -70,15 +74,18 @@ let Home = {
           if (response.data.businesses.length) {
             vm.restaurant = response.data.businesses[0]
             vm.image = response.data.businesses[0].image_url
+            vm.processing = false
           } else {
             vm.searchYelp
           }
         })
         .catch(function(error) {
+          vm.processing = false
           console.log(error)
         })
     },
     async getLocationAndSearch(search) {
+      this.processing = true
       search ? (this.search = search) : {}
       return new Promise(function(resolve, reject) {
         navigator.geolocation.getCurrentPosition(resolve, reject)
@@ -90,6 +97,7 @@ let Home = {
           if (!this.manualInput) {
             window.alert('Could not find your location')
             this.manualInput = true
+            this.processing = false
           } else {
             this.searchYelp(null)
           }
@@ -107,8 +115,9 @@ export default Home
 
 <template lang="pug">
   .home
-    categorySearch(@search="(val) => getLocationAndSearch(val)" :manualInput="this.manualInput")
+    categorySearch(v-if="!processing && restaurant === null" @search="(val) => getLocationAndSearch(val)" :manualInput="this.manualInput")
     cardView(:restaurant="this.restaurant" :image="this.image" @next="getLocationAndSearch")
+    button(v-if="!processing && restaurant !== null" @click="newSearch") New Search
 </template>
 <style lang="postcss" scoped>
 .home {
