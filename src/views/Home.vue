@@ -16,7 +16,7 @@ let Home = {
       yelp: process.env.VUE_APP_YELP,
       api: process.env.VUE_APP_API,
       processing: false,
-      restaurant: null,
+      restaurant: [],
       image: null,
       latitude: '',
       longitude: '',
@@ -24,37 +24,74 @@ let Home = {
       search: {},
       manualInput: false,
       showCards: false,
+      categoryString: '',
+      location: {},
+      lastRestaurantId: '',
     }
   },
   computed: {},
   methods: {
     newSearch() {
-      this.restaurant = null
+      this.restaurant = []
       this.image = null
       this.search = {}
       this.showCards = false
+    },
+    nextCard() {
+      this.lastRestaurantId = this.restaurant[0].id
+      this.restaurant.shift()
+    },
+    stackDeck() {
+      const vm = this
+      if (vm.restaurant.length <= 3) vm.processing = true
+      const offset = Math.floor(Math.random() * vm.totalRestaurants + 1)
+      return axios
+        .get(vm.api, {
+          params: {
+            ...vm.location,
+            radius: vm.search.radius,
+            categories: vm.categoryString,
+            offset: offset,
+            limit: 1,
+          },
+          headers: {
+            Authorization: `Bearer ${vm.yelp}`,
+          },
+        })
+        .then(response => {
+          if (response.data.businesses.length && response.data.businesses[0].image_url !== '') {
+            vm.restaurant.push(response.data.businesses[0])
+            vm.image = response.data.businesses[0].image_url
+            vm.processing = false
+          } else {
+            vm.searchYelp
+          }
+        })
+        .catch(function(error) {
+          vm.processing = false
+          console.log(error)
+        })
     },
     searchYelp(res) {
       const vm = this
       const categoryArray = []
       vm.showCards = true
       vm.search.categories.map(x => categoryArray.push(x.alias))
-      let categoryString = categoryArray.join(',')
-      let location = {}
+      vm.categoryString = categoryArray.join(',')
       if (res !== null) {
         const position = res
         vm.latitude = position.coords.latitude
         vm.longitude = position.coords.longitude
-        location = { latitude: vm.latitude, longitude: vm.longitude }
+        vm.location = { latitude: vm.latitude, longitude: vm.longitude }
       } else {
-        location = { location: vm.search.manualLocation }
+        vm.location = { location: vm.search.manualLocation }
       }
       return axios
         .get(vm.api, {
           params: {
-            ...location,
+            ...vm.location,
             radius: vm.search.radius,
-            categories: categoryString,
+            categories: vm.categoryString,
           },
           headers: {
             Authorization: `Bearer ${vm.yelp}`,
@@ -65,9 +102,9 @@ let Home = {
           const offset = Math.floor(Math.random() * vm.totalRestaurants + 1)
           return axios.get(vm.api, {
             params: {
-              ...location,
+              ...vm.location,
               radius: vm.search.radius,
-              categories: categoryString,
+              categories: vm.categoryString,
               offset: offset,
               limit: 1,
             },
@@ -78,7 +115,7 @@ let Home = {
         })
         .then(response => {
           if (response.data.businesses.length && response.data.businesses[0].image_url !== '') {
-            vm.restaurant = response.data.businesses[0]
+            vm.restaurant.push(response.data.businesses[0])
             vm.image = response.data.businesses[0].image_url
             vm.processing = false
           } else {
@@ -110,6 +147,13 @@ let Home = {
         })
     },
   },
+  watch: {
+    restaurant: {
+      handler: function(val, _oldVal) {
+        if (val.length >= 1 && val.length <= 5) this.stackDeck()
+      },
+    },
+  },
 }
 VueTidyRoutes.route(`/home`, {
   name: 'home',
@@ -122,9 +166,9 @@ export default Home
 <template lang="pug">
   .home#home(:class="{darken: showCards}")
     transition(name="custom-classes-transition" enter-active-class="animated fadeIn" leave-active-class="animated fadeOut")
-      categorySearch(v-if="!processing && restaurant === null" @search="(val) => getLocationAndSearch(val)" :manualInput="this.manualInput")
+      categorySearch(v-if="!processing && restaurant.length === 0" @search="(val) => getLocationAndSearch(val)" :manualInput="this.manualInput")
     transition(name="custom-classes-transition" enter-active-class="animated fadeInLeft" leave-active-class="animated fadeOutRight")
-      cardView(v-if="!processing && showCards" :restaurant="this.restaurant" :image="this.image" @next="getLocationAndSearch")
+      cardView(v-if="showCards" :restaurant="restaurant[0]" :image="restaurant[0].image_url" @next="nextCard")
     button(v-if="!processing && showCards" @click="newSearch") New Search
 </template>
 <style lang="postcss" scoped>
