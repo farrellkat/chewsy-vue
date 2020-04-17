@@ -119,7 +119,7 @@ export default {
     text-indent: 1rem;
   }
   & /deep/ input:focus {
-    border: 1px solid cadetblue;
+    border: 1px solid pink;
     outline: none;
   }
   & .search-form {

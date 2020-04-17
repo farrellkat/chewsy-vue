@@ -15,25 +15,33 @@ export default {
 <template lang="pug">
 .card-view(data-cy='card-view')
   .restaurant-info(v-if="restaurant") 
-    h1.name {{ restaurant.name }}
-    .price Price: {{ restaurant.price}}
-    .address
-      span(v-for="address in restaurant.location.display_address") {{ address }}
-      a(:href="`tel:${restaurant.phone}`") {{ restaurant.display_phone }}
+    //- h1.name {{ restaurant.name }}
+    //- .price Price: {{ restaurant.price}}
+    //- .address
+    //-   span(v-for="address in restaurant.location.display_address") {{ address }}
+    //-   a(:href="`tel:${restaurant.phone}`") {{ restaurant.display_phone }}
     .image-holder(@click="next")
       img(:src="image")
 </template>
 <style lang="postcss" scoped>
 .card-view {
-  width: 18rem;
+  width: 30rem;
   margin: auto;
   & .image-holder {
     border-radius: 15px;
+    width: inherit;
+    overflow: hidden;
+    display: flex;
+    justify-content: center;
   }
   & .restaurant-info,
   & .image-holder,
   & img {
     width: inherit;
+    overflow: hidden;
+    display: flex;
+    justify-content: center;
+    align-items: center;
   }
 
   & .restaurant-info {

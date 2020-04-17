@@ -10,6 +10,7 @@ let Home = {
     categorySearch: categorySearch,
     cardView: cardView,
   },
+  el: '#home',
   data() {
     return {
       yelp: process.env.VUE_APP_YELP,
@@ -22,16 +23,21 @@ let Home = {
       totalRestaurants: null,
       search: {},
       manualInput: false,
+      showCards: false,
     }
   },
   computed: {},
   methods: {
     newSearch() {
-      ;(this.restaurant = null), (this.image = null), (this.search = {})
+      this.restaurant = null
+      this.image = null
+      this.search = {}
+      this.showCards = false
     },
     searchYelp(res) {
       const vm = this
       const categoryArray = []
+      vm.showCards = true
       vm.search.categories.map(x => categoryArray.push(x.alias))
       let categoryString = categoryArray.join(',')
       let location = {}
@@ -71,7 +77,7 @@ let Home = {
           })
         })
         .then(response => {
-          if (response.data.businesses.length) {
+          if (response.data.businesses.length && response.data.businesses[0].image_url !== '') {
             vm.restaurant = response.data.businesses[0]
             vm.image = response.data.businesses[0].image_url
             vm.processing = false
@@ -114,13 +120,41 @@ export default Home
 </script>
 
 <template lang="pug">
-  .home
-    categorySearch(v-if="!processing && restaurant === null" @search="(val) => getLocationAndSearch(val)" :manualInput="this.manualInput")
-    cardView(:restaurant="this.restaurant" :image="this.image" @next="getLocationAndSearch")
-    button(v-if="!processing && restaurant !== null" @click="newSearch") New Search
+  .home#home(:class="{darken: showCards}")
+    transition(name="custom-classes-transition" enter-active-class="animated fadeIn" leave-active-class="animated fadeOut")
+      categorySearch(v-if="!processing && restaurant === null" @search="(val) => getLocationAndSearch(val)" :manualInput="this.manualInput")
+    transition(name="custom-classes-transition" enter-active-class="animated fadeInLeft" leave-active-class="animated fadeOutRight")
+      cardView(v-if="!processing && showCards" :restaurant="this.restaurant" :image="this.image" @next="getLocationAndSearch")
+    button(v-if="!processing && showCards" @click="newSearch") New Search
 </template>
 <style lang="postcss" scoped>
 .home {
   padding: 2rem 20rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+.darken {
+  background-image: none !important;
+  -o-animation: fadeIt 1s forwards;
+  animation: fadeIt 1s forwards;
+  height: 100vh;
+}
+@-o-keyframes fadeIt {
+  0% {
+    background-color: #ffffff;
+  }
+  100% {
+    background-color: #272938;
+  }
+}
+@keyframes fadeIt {
+  0% {
+    background-color: #ffffff;
+  }
+  100% {
+    background-color: #272938;
+  }
 }
 </style>
