@@ -3,7 +3,7 @@ import categoriesJSON from '../../categories.json'
 
 export default {
   name: 'category-search',
-  props: ['manualInput'],
+  props: ['manualInput', 'selectedCategories'],
 
   data() {
     const all = categoriesJSON.filter(x => x.parents.find(y => y === 'food' || y === 'restaurants'))
@@ -20,8 +20,8 @@ export default {
       term: '',
       filtered: filtered,
       categoriesJSON,
-      suggestions: filtered,
-      categories: [],
+      // suggestions: filtered,
+      categories: this.selectedCategories || [],
       manualLocation: '',
       radius: null,
       options: [
@@ -47,13 +47,8 @@ export default {
       }
       this.$emit('search', search)
     },
-    addCategory(alias, index) {
-      this.categories.push(alias)
-      this.suggestions.splice(index, 1)
-    },
     removeCategory(selected, index) {
-      this.categories.splice(index, 1)
-      this.suggestions.unshift(selected)
+      this.$emit('remove', selected, index)
     },
     autocomplete() {
       const vm = this
@@ -70,14 +65,15 @@ export default {
           }
           return a
         }, [])
-        vm.suggestions = prediction
+        this.$emit('suggestions', prediction)
+        // vm.suggestions = prediction
       }
     },
   },
   watch: {
     term() {
       if (this.term === '') {
-        this.suggestions = this.filtered
+        this.$emit('suggestions', this.filtered)
       }
     },
   },
@@ -89,7 +85,7 @@ export default {
     input(id="search" autocomplete="off" v-model="term" @input="autocomplete" placeholder="Search categories" v-lowercase)
     .radius 
       template(v-for="option in options")
-        .circle.hover(@click="selectRadius(option.value)" :class="active(option.value)")
+        .circle-select.hover(@click="selectRadius(option.value)" :class="active(option.value)")
           .circle-name {{ option.string }}
     button(@click="searchYelp") search
     .manual-input(v-if="manualInput")
@@ -100,70 +96,19 @@ export default {
     template(v-for="(selected,index) in categories")
       .pill(@click="removeCategory(selected,index)") {{ selected.title }}
         .close x
-  //- h1(v-if="location") in {{ location }}
-  .suggestions
-    template(v-for="(suggestion, index) in suggestions")
-      .pill(@click="addCategory(suggestion, index)") {{ suggestion.title }}
 </template>
 <style lang="postcss" scoped>
 .category-search {
   & h1 {
     margin: 0 0 1rem 0;
   }
-  & input {
-    border: 1px solid pink;
-    border-radius: 30px;
-    padding: 0.5rem;
-    flex-basis: 30%;
-    font-size: 2rem;
-    text-indent: 1rem;
-  }
-  & /deep/ input:focus {
-    border: 1px solid pink;
-    outline: none;
-  }
   & .search-form {
     display: flex;
     margin: auto;
-    justify-content: space-between;
-    padding: 0rem 2rem 1rem 2rem;
-    align-items: center;
-    & button {
-      border: 2px solid pink;
-      padding: 1rem 2rem;
-      border-radius: 4px;
-      color: pink;
-      font-family: helvetica;
-      font-weight: bold;
-      font-size: 1rem;
-    }
-    & button:hover {
-      background-color: pink;
-      color: white;
-      cursor: pointer;
-    }
-  }
-  & .suggestions {
-    display: flex;
-    justify-content: space-evenly;
-    margin: auto;
+    justify-content: center;
     flex-wrap: wrap;
-    padding: 2rem;
-    border: 4px solid pink;
-    border-radius: 15px;
-  }
-  & .pill {
-    padding: 1rem;
-    margin: 0.5rem;
-    background-color: pink;
-    border-radius: 20px;
-    display: flex;
-    & .close {
-      margin-left: 1rem;
-    }
-  }
-  & .pill:hover {
-    cursor: pointer;
+    /* padding: 0rem 2rem 1rem 2rem; */
+    align-items: center;
   }
   & .selected-categories {
     display: flex;
@@ -172,32 +117,33 @@ export default {
     padding-bottom: 2rem;
   }
   & .radius {
-    flex-basis: 70%;
     display: flex;
     justify-content: space-evenly;
-    & .circle {
-      height: 75px;
-      width: 75px;
-      border-radius: 50%;
-      color: black;
-      display: flex;
-      align-items: center;
-      justify-content: center;
+    padding: 1rem 1rem;
+    width: 100%;
+    flex-basis: 70%;
+  }
+}
+
+@media (min-width: 992px) {
+  .category-search {
+    width: 100%;
+    & .search-form {
+      flex-wrap: nowrap;
+      width: 75%;
     }
-    & .circle:hover:not(.active) {
-      /* border: 1px solid pink; */
-      background-color: rgb(255, 248, 249);
-    }
-    & .circle-name {
+    & .radius {
+      flex-basis: 70%;
     }
   }
-  & .hover {
-    cursor: pointer;
-  }
-  & .circle.active {
-    background: pink;
-    border: none;
-    color: white;
+}
+@media (min-width: 1200px) {
+  .category-search {
+    width: 100%;
+    & .search-form {
+      flex-wrap: nowrap;
+      width: 50%;
+    }
   }
 }
 </style>

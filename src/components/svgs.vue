@@ -1,12 +1,12 @@
 <script>
-export default{
+export default {
   props: ['name', 'classes', 'visible', 'dataCy'],
   name: 'svgs',
 }
 // ice-cream-cone
 // strawberry
 </script>
-<template functional lang='pug'>
+<template functional lang="pug">
 div.svgs(:class="props.name +  ' ' + (props.classes || '')" v-on="listeners['onClick'] ? { click: listeners['onClick'] } : {}")
   svg(v-if="props.name=='ice-cream-cone' && props.visible!==false", :data-cy-svgs="props.dataCy || 'ice-cream-cone'", xmlns="http://www.w3.org/2000/svg", xlink="http://www.w3.org/1999/xlink", viewBox="0 0 16 16")
     defs
@@ -81,4 +81,3 @@ div.svgs(:class="props.name +  ' ' + (props.classes || '')" v-on="listeners['onC
   }
 }
 </style>
-

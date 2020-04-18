@@ -7,6 +7,7 @@ import VueTidyRoutes from 'vue-tidyroutes'
 import VueRouter from 'vue-router'
 import AnimateCSS from 'animate.css'
 import '@/components/index'
+import '@/theme/site.css'
 
 import './views/home'
 // import './components/category-search'

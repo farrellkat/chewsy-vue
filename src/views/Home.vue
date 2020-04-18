@@ -27,10 +27,20 @@ let Home = {
       categoryString: '',
       location: {},
       lastRestaurantId: '',
+      suggestions: '',
+      selectedCategories: [],
     }
   },
   computed: {},
   methods: {
+    addCategory(alias, index) {
+      this.selectedCategories.push(alias)
+      this.suggestions.splice(index, 1)
+    },
+    removeCategory(selected, index) {
+      this.categories.splice(index, 1)
+      this.suggestions.unshift(selected)
+    },
     newSearch() {
       this.restaurant = []
       this.image = null
@@ -164,20 +174,31 @@ export default Home
 </script>
 
 <template lang="pug">
-  .home#home(:class="{darken: showCards}")
+  .home.vp-pad(:class="{darken: showCards}")
     transition(name="custom-classes-transition" enter-active-class="animated fadeIn" leave-active-class="animated fadeOut")
-      category-search(v-if="!processing && restaurant.length === 0" @search="(val) => getLocationAndSearch(val)" :manualInput="this.manualInput")
+      category-search(v-if="!processing && restaurant.length === 0" @search="(val) => getLocationAndSearch(val)" @remove="removeCategory" @suggestions="val => this.suggestions = val" :manualInput="this.manualInput" :selectedCategories="this.selectedCategories")
+    .suggestions
+      template(v-for="(suggestion, index) in suggestions")
+        .pill.hover(@click="addCategory(suggestion, index)") {{ suggestion.title }}
     transition(name="custom-classes-transition" enter-active-class="animated fadeInLeft" leave-active-class="animated fadeOutRight")
       card-view(v-if="showCards" :restaurant="restaurant[0]" :image="restaurant[0].image_url" @next="nextCard")
     button(v-if="!processing && showCards" @click="newSearch") New Search
 </template>
 <style lang="postcss" scoped>
 .home {
-  padding: 2rem 20rem;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
+  & .suggestions {
+    display: flex;
+    justify-content: space-evenly;
+    margin: auto;
+    flex-wrap: wrap;
+    padding: 2rem;
+    border: 4px solid pink;
+    border-radius: 15px;
+  }
 }
 .darken {
   background-image: none !important;
