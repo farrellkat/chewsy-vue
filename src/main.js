@@ -6,9 +6,10 @@ import VueAxios from 'vue-axios'
 import VueTidyRoutes from 'vue-tidyroutes'
 import VueRouter from 'vue-router'
 import AnimateCSS from 'animate.css'
+import '@/components/index'
 
 import './views/home'
-import './components/category-search'
+// import './components/category-search'
 
 Vue.use(VueAxios, axios)
 Vue.use(VueRouter)

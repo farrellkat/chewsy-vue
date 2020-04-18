@@ -1,15 +1,15 @@
 <script>
 import VueTidyRoutes from 'vue-tidyroutes'
-import categorySearch from '../components/category-search'
-import cardView from '../components/card-view'
+// import categorySearch from '../components/category-search'
+// import cardView from '../components/card-view'
 import axios from 'axios'
 
 let Home = {
   name: 'home',
-  components: {
-    categorySearch: categorySearch,
-    cardView: cardView,
-  },
+  // components: {
+  //   categorySearch: categorySearch,
+  //   cardView: cardView,
+  // },
   el: '#home',
   data() {
     return {
@@ -166,9 +166,9 @@ export default Home
 <template lang="pug">
   .home#home(:class="{darken: showCards}")
     transition(name="custom-classes-transition" enter-active-class="animated fadeIn" leave-active-class="animated fadeOut")
-      categorySearch(v-if="!processing && restaurant.length === 0" @search="(val) => getLocationAndSearch(val)" :manualInput="this.manualInput")
+      category-search(v-if="!processing && restaurant.length === 0" @search="(val) => getLocationAndSearch(val)" :manualInput="this.manualInput")
     transition(name="custom-classes-transition" enter-active-class="animated fadeInLeft" leave-active-class="animated fadeOutRight")
-      cardView(v-if="showCards" :restaurant="restaurant[0]" :image="restaurant[0].image_url" @next="nextCard")
+      card-view(v-if="showCards" :restaurant="restaurant[0]" :image="restaurant[0].image_url" @next="nextCard")
     button(v-if="!processing && showCards" @click="newSearch") New Search
 </template>
 <style lang="postcss" scoped>
