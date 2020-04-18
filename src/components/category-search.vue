@@ -20,10 +20,10 @@ export default {
       term: '',
       filtered: filtered,
       categoriesJSON,
-      // suggestions: filtered,
       categories: this.selectedCategories || [],
       manualLocation: '',
       radius: null,
+      inputPlaceholder: 'Search categories',
       options: [
         { string: '1 mile', value: 1609 },
         { string: '3 miles', value: 1609 * 3 },
@@ -70,6 +70,9 @@ export default {
       }
     },
   },
+  mounted() {
+    this.$emit('suggestions', this.filtered)
+  },
   watch: {
     term() {
       if (this.term === '') {
@@ -82,46 +85,64 @@ export default {
 <template lang="pug">
 .category-search
   .search-form
-    input(id="search" autocomplete="off" v-model="term" @input="autocomplete" placeholder="Search categories" v-lowercase)
+    input(id="search" autocomplete="off" v-model="term" @input="autocomplete" @focus="inputPlaceholder = ''" @blur="inputPlaceholder = 'Search categories'" :placeholder="inputPlaceholder" v-lowercase)
     .radius 
       template(v-for="option in options")
         .circle-select.hover(@click="selectRadius(option.value)" :class="active(option.value)")
           .circle-name {{ option.string }}
-    button(@click="searchYelp") search
+    .selected-categories
+      template(v-for="(selected,index) in categories")
+        .pill.delete-pill.inverse.hover(@click="removeCategory(selected,index)") {{ selected.title }}
+          .close x
+    button(v-if="categories.length" @click="searchYelp") search
     .manual-input(v-if="manualInput")
       label(for='city-input') Location
       input(id='city-input' v-model="manualLocation")
-  h1(v-if="categories.length") Show me
-  .selected-categories
-    template(v-for="(selected,index) in categories")
-      .pill(@click="removeCategory(selected,index)") {{ selected.title }}
-        .close x
 </template>
 <style lang="postcss" scoped>
 .category-search {
+  width: 100%;
+  margin-bottom: 1rem;
   & h1 {
     margin: 0 0 1rem 0;
   }
   & .search-form {
+    display: grid;
+    grid-row-gap: 1rem;
+    grid-template-columns: 1fr 1fr 1fr;
+    grid-template-areas:
+      '. input .'
+      '. radius. '
+      'selected selected selected '
+      '. search. ';
+    & input {
+      grid-area: input;
+      text-align: center;
+      text-indent: 0;
+    }
+    & button {
+      grid-area: search;
+    }
+  }
+  & .selected-categories {
+    grid-area: selected;
     display: flex;
     margin: auto;
     justify-content: center;
     flex-wrap: wrap;
-    /* padding: 0rem 2rem 1rem 2rem; */
-    align-items: center;
-  }
-  & .selected-categories {
-    display: flex;
-    margin: auto;
-    justify-content: center;
-    padding-bottom: 2rem;
   }
   & .radius {
+    grid-area: radius;
     display: flex;
-    justify-content: space-evenly;
-    padding: 1rem 1rem;
+    justify-content: space-between;
     width: 100%;
-    flex-basis: 70%;
+  }
+}
+
+/* Small devices (landscape phones, 576px and up) */
+@media (min-width: 576px) {
+  .search-form {
+    margin: auto;
   }
 }
 
@@ -129,21 +150,15 @@ export default {
   .category-search {
     width: 100%;
     & .search-form {
-      flex-wrap: nowrap;
-      width: 75%;
-    }
-    & .radius {
-      flex-basis: 70%;
+      width: 100%;
+      grid-template-columns: 3fr 2fr 1fr;
+      grid-column-gap: 4rem;
+      grid-template-areas:
+        'input radius search'
+        'selected selected selected';
     }
   }
 }
 @media (min-width: 1200px) {
-  .category-search {
-    width: 100%;
-    & .search-form {
-      flex-wrap: nowrap;
-      width: 50%;
-    }
-  }
 }
 </style>

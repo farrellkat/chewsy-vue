@@ -25,8 +25,9 @@ export default {
 </template>
 <style lang="postcss" scoped>
 .card-view {
-  width: 30rem;
+  width: 100%;
   margin: auto;
+  padding: 2rem;
   & .image-holder {
     border-radius: 15px;
     width: inherit;
@@ -42,12 +43,6 @@ export default {
     display: flex;
     justify-content: center;
     align-items: center;
-  }
-
-  & .restaurant-info {
-    padding: 2rem;
-    border: 4px solid pink;
-    border-radius: 15px;
   }
   & .price,
   & .name {

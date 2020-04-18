@@ -5,12 +5,6 @@ import VueTidyRoutes from 'vue-tidyroutes'
 import axios from 'axios'
 
 let Home = {
-  name: 'home',
-  // components: {
-  //   categorySearch: categorySearch,
-  //   cardView: cardView,
-  // },
-  el: '#home',
   data() {
     return {
       yelp: process.env.VUE_APP_YELP,
@@ -38,13 +32,14 @@ let Home = {
       this.suggestions.splice(index, 1)
     },
     removeCategory(selected, index) {
-      this.categories.splice(index, 1)
+      this.selectedCategories.splice(index, 1)
       this.suggestions.unshift(selected)
     },
     newSearch() {
       this.restaurant = []
       this.image = null
       this.search = {}
+      this.selectedCategories = []
       this.showCards = false
     },
     nextCard() {
@@ -174,30 +169,37 @@ export default Home
 </script>
 
 <template lang="pug">
-  .home.vp-pad(:class="{darken: showCards}")
+  .home.vp-panel.vp-pad(:class="{darken: showCards}")
     transition(name="custom-classes-transition" enter-active-class="animated fadeIn" leave-active-class="animated fadeOut")
       category-search(v-if="!processing && restaurant.length === 0" @search="(val) => getLocationAndSearch(val)" @remove="removeCategory" @suggestions="val => this.suggestions = val" :manualInput="this.manualInput" :selectedCategories="this.selectedCategories")
-    .suggestions
-      template(v-for="(suggestion, index) in suggestions")
-        .pill.hover(@click="addCategory(suggestion, index)") {{ suggestion.title }}
-    transition(name="custom-classes-transition" enter-active-class="animated fadeInLeft" leave-active-class="animated fadeOutRight")
-      card-view(v-if="showCards" :restaurant="restaurant[0]" :image="restaurant[0].image_url" @next="nextCard")
     button(v-if="!processing && showCards" @click="newSearch") New Search
+    .action-container  
+      .suggestions
+        template(v-for="(suggestion, index) in suggestions" v-if="!processing && restaurant.length === 0")
+          .pill.hover(@click="addCategory(suggestion, index)") {{ suggestion.title }}
+        transition(name="custom-classes-transition" enter-active-class="animated fadeInLeft" leave-active-class="animated fadeOutRight")
+          card-view(v-if="showCards" :restaurant="restaurant[0]" :image="restaurant[0].image_url" @next="nextCard")
 </template>
 <style lang="postcss" scoped>
 .home {
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
-  & .suggestions {
-    display: flex;
-    justify-content: space-evenly;
-    margin: auto;
-    flex-wrap: wrap;
-    padding: 2rem;
+  justify-content: flex-start;
+  & button {
+    margin-bottom: 1rem;
+  }
+  & .action-container {
     border: 4px solid pink;
     border-radius: 15px;
+  }
+  & .suggestions {
+    display: flex;
+    justify-content: space-around;
+    margin: auto;
+    border-radius: 15px;
+    padding: 1rem 0;
+    flex-wrap: wrap;
   }
 }
 .darken {
