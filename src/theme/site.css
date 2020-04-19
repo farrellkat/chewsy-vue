@@ -1,13 +1,14 @@
 :root{
-  --dark-blue: #272938
+  --dark-blue: #272938;
+  --light-goldenrod: #fcdc8c;
 }
 
 html {
-  background-color: var(--dark-blue);
+  background-color: pink;
 }
 
 input {
-  border: 1px solid pink;
+  border: 1px solid darkgoldenrod;
   border-radius: 30px;
   padding: 0.5rem;
   flex-basis: 30%;
@@ -20,16 +21,18 @@ input:focus {
 }
 button {
   background: transparent;
-  border: 2px solid pink;
+  border: 1px solid goldenrod;
   padding: 1rem 2rem;
   border-radius: 4px;
-  color: pink;
+  color: black;
   font-family: helvetica;
-  font-weight: bold;
+  font-weight: normal;
   font-size: 1rem;
+  background-color: white;
 }
 button:hover {
   background-color: pink;
+  border-color: pink;
   color: white;
   cursor: pointer;
 }
@@ -67,15 +70,55 @@ button:hover {
   justify-content: center;
 }
 .circle-select.active {
-  background: pink;
+  background: var(--light-goldenrod);
   border: none;
-  color: white;
 }
 .circle-select:hover:not(.active) {
-  background-color: rgb(255, 248, 249);
+  background-color: var(--light-goldenrod);
 }
-.vp-panel {
-  background-color: var(--dark-blue);
+
+/* KEYFRAMES */
+@-o-keyframes fade-to-dark {
+  0% {
+    background-color: #ffffff;
+  }
+  100% {
+    background-color: pink;
+  }
+}
+@keyframes fade-to-dark {
+  0% {
+    background-color: #ffffff;
+  }
+  100% {
+    background-color: pink;
+  }
+}
+@-o-keyframes fade-to-light {
+  0% {
+    background-color: pink;
+  }
+  100% {
+    background-color: #ffffff;
+  }
+}
+@keyframes fade-to-light {
+  0% {
+    background-color: pink;
+  }
+  100% {
+    background-color: #ffffff;
+  }
+}
+@keyframes grow {
+  0% {
+    width: 0;
+    height: 0;
+  }
+  100% {
+    width: 4rem;
+    height: 4rem;
+  }
 }
 
 @media (min-width: 400px) { 

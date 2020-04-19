@@ -36,6 +36,7 @@ let Home = {
       this.suggestions.unshift(selected)
     },
     newSearch() {
+      this.$emit('lighten')
       this.restaurant = []
       this.image = null
       this.search = {}
@@ -43,12 +44,11 @@ let Home = {
       this.showCards = false
     },
     nextCard() {
-      this.lastRestaurantId = this.restaurant[0].id
       this.restaurant.shift()
     },
     stackDeck() {
       const vm = this
-      if (vm.restaurant.length <= 3) vm.processing = true
+      if (vm.restaurant.length <= 2) vm.processing = true
       const offset = Math.floor(Math.random() * vm.totalRestaurants + 1)
       return axios
         .get(vm.api, {
@@ -69,7 +69,7 @@ let Home = {
             vm.image = response.data.businesses[0].image_url
             vm.processing = false
           } else {
-            vm.searchYelp
+            vm.stackDeck
           }
         })
         .catch(function(error) {
@@ -133,6 +133,8 @@ let Home = {
         })
     },
     async getLocationAndSearch(search) {
+      this.$emit('darken')
+      this.suggestions = []
       this.processing = true
       search ? (this.search = search) : {}
       return new Promise(function(resolve, reject) {
@@ -169,16 +171,16 @@ export default Home
 </script>
 
 <template lang="pug">
-  .home.vp-panel.vp-pad(:class="{darken: showCards}")
+  .home.vp-panel.vp-pad
     transition(name="custom-classes-transition" enter-active-class="animated fadeIn" leave-active-class="animated fadeOut")
       category-search(v-if="!processing && restaurant.length === 0" @search="(val) => getLocationAndSearch(val)" @remove="removeCategory" @suggestions="val => this.suggestions = val" :manualInput="this.manualInput" :selectedCategories="this.selectedCategories")
-    button(v-if="!processing && showCards" @click="newSearch") New Search
-    .action-container  
-      .suggestions
-        template(v-for="(suggestion, index) in suggestions" v-if="!processing && restaurant.length === 0")
+    .action-container(v-if="suggestions.length || restaurant.length")
+      .suggestions(v-if="!processing && restaurant.length === 0")
+        template(v-for="(suggestion, index) in suggestions")
           .pill.hover(@click="addCategory(suggestion, index)") {{ suggestion.title }}
-        transition(name="custom-classes-transition" enter-active-class="animated fadeInLeft" leave-active-class="animated fadeOutRight")
-          card-view(v-if="showCards" :restaurant="restaurant[0]" :image="restaurant[0].image_url" @next="nextCard")
+      transition(name="custom-classes-transition" enter-active-class="animated fadeInLeft" leave-active-class="animated fadeOutRight")
+        card-view(v-if="showCards" :restaurant="restaurant[0]" :image="restaurant[0].image_url" @next="nextCard")
+    button(v-if="!processing && showCards" @click="newSearch") New Search
 </template>
 <style lang="postcss" scoped>
 .home {
@@ -190,8 +192,10 @@ export default Home
     margin-bottom: 1rem;
   }
   & .action-container {
-    border: 4px solid pink;
+    border: 4px solid darkgoldenrod;
+    background-color: white;
     border-radius: 15px;
+    display: flex;
   }
   & .suggestions {
     display: flex;
@@ -200,28 +204,6 @@ export default Home
     border-radius: 15px;
     padding: 1rem 0;
     flex-wrap: wrap;
-  }
-}
-.darken {
-  background-image: none !important;
-  -o-animation: fadeIt 1s forwards;
-  animation: fadeIt 1s forwards;
-  height: 100vh;
-}
-@-o-keyframes fadeIt {
-  0% {
-    background-color: #ffffff;
-  }
-  100% {
-    background-color: #272938;
-  }
-}
-@keyframes fadeIt {
-  0% {
-    background-color: #ffffff;
-  }
-  100% {
-    background-color: #272938;
   }
 }
 </style>
