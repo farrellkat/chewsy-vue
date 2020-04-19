@@ -3,7 +3,6 @@ import categoriesJSON from '../../categories.json'
 
 export default {
   name: 'category-search',
-  props: ['manualInput', 'selectedCategories'],
 
   data() {
     const all = categoriesJSON.filter(x => x.parents.find(y => y === 'food' || y === 'restaurants'))
@@ -20,7 +19,7 @@ export default {
       term: '',
       filtered: filtered,
       categoriesJSON,
-      categories: this.selectedCategories || [],
+      categories: this.$attrs.params.selectedCategories || [],
       manualLocation: '',
       radius: null,
       inputPlaceholder: 'Search categories',
@@ -45,6 +44,9 @@ export default {
         radius: this.radius,
         manualLocation: this.manualLocation,
       }
+      this.$router.push({ name: 'cards' }).catch(err => {
+        console.log(err)
+      })
       this.$emit('search', search)
     },
     removeCategory(selected, index) {
@@ -66,7 +68,6 @@ export default {
           return a
         }, [])
         this.$emit('suggestions', prediction)
-        // vm.suggestions = prediction
       }
     },
   },
@@ -95,7 +96,7 @@ export default {
         .pill.delete-pill.inverse.hover(@click="removeCategory(selected,index)") {{ selected.title }}
           .close x
     button(v-if="categories.length" @click="searchYelp") search
-    .manual-input(v-if="manualInput")
+    .manual-input(v-if="this.$attrs.params.manualInput")
       label(for='city-input') Location
       input(id='city-input' v-model="manualLocation")
 </template>

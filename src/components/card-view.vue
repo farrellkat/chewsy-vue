@@ -1,13 +1,17 @@
 <script>
 export default {
   name: 'card-view',
-  props: ['restaurant', 'image'],
   data() {
     return {}
   },
   methods: {
     next() {
       this.$emit('next')
+    },
+  },
+  computed: {
+    restaurant() {
+      return this.$attrs.params.restaurant[0]
     },
   },
 }
@@ -21,11 +25,11 @@ export default {
     //-   span(v-for="address in restaurant.location.display_address") {{ address }}
     //-   a(:href="`tel:${restaurant.phone}`") {{ restaurant.display_phone }}
     .image-holder(@click="next")
-      img(:src="image")
+      img(:src="restaurant.image_url")
 </template>
 <style lang="postcss" scoped>
 .card-view {
-  width: 100%;
+  width: 30rem;
   margin: auto;
   padding: 2rem;
   & .image-holder {

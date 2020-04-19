@@ -2,18 +2,20 @@
 export default {
   name: 'default',
   data() {
-    return {
-      darken: false,
-    }
+    return {}
   },
-  computed: {},
+  computed: {
+    darken() {
+      return this.$route.name === 'cards'
+    },
+  },
   methods: {},
 }
 </script>
 <template lang="pug">
 .default(:class="darken ? 'darken' : 'lighten'")
-  layout-navbar(:darken="darken")
-  router-view(@darken="darken = true" @lighten="darken = false")
+  layout-navbar
+  router-view
 </template>
 <style lang="postcss" scoped>
 .default.darken {

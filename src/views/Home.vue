@@ -1,8 +1,8 @@
 <script>
 import VueTidyRoutes from 'vue-tidyroutes'
-// import categorySearch from '../components/category-search'
-// import cardView from '../components/card-view'
 import axios from 'axios'
+import Search from '../components/category-search'
+import Cards from '../components/card-view'
 
 let Home = {
   data() {
@@ -133,7 +133,6 @@ let Home = {
         })
     },
     async getLocationAndSearch(search) {
-      this.$emit('darken')
       this.suggestions = []
       this.processing = true
       search ? (this.search = search) : {}
@@ -165,6 +164,20 @@ let Home = {
 VueTidyRoutes.route(`/home`, {
   name: 'home',
   component: Home,
+  children: [
+    {
+      name: 'search',
+      path: 'search',
+      component: Search,
+      props: true,
+    },
+    {
+      name: 'cards',
+      path: 'cards',
+      component: Cards,
+      props: true,
+    },
+  ],
 })
 
 export default Home
@@ -172,14 +185,10 @@ export default Home
 
 <template lang="pug">
   .home.vp-panel.vp-pad
-    transition(name="custom-classes-transition" enter-active-class="animated fadeIn" leave-active-class="animated fadeOut")
-      category-search(v-if="!processing && restaurant.length === 0" @search="(val) => getLocationAndSearch(val)" @remove="removeCategory" @suggestions="val => this.suggestions = val" :manualInput="this.manualInput" :selectedCategories="this.selectedCategories")
-    .action-container(v-if="suggestions.length || restaurant.length")
-      .suggestions(v-if="!processing && restaurant.length === 0")
-        template(v-for="(suggestion, index) in suggestions")
-          .pill.hover(@click="addCategory(suggestion, index)") {{ suggestion.title }}
-      transition(name="custom-classes-transition" enter-active-class="animated fadeInLeft" leave-active-class="animated fadeOutRight")
-        card-view(v-if="showCards" :restaurant="restaurant[0]" :image="restaurant[0].image_url" @next="nextCard")
+    router-view(@search="(val) => getLocationAndSearch(val)" @remove="removeCategory" @suggestions="val => this.suggestions = val" @next="nextCard" :params="{selectedCategories, manualInput, restaurant}") 
+    .suggestions
+      template(v-for="(suggestion, index) in suggestions")
+        .pill.hover(@click="addCategory(suggestion, index)") {{ suggestion.title }}
     button(v-if="!processing && showCards" @click="newSearch") New Search
 </template>
 <style lang="postcss" scoped>
@@ -190,12 +199,6 @@ export default Home
   justify-content: flex-start;
   & button {
     margin-top: 1rem;
-  }
-  & .action-container {
-    border: 4px solid darkgoldenrod;
-    background-color: white;
-    border-radius: 15px;
-    display: flex;
   }
   & .suggestions {
     display: flex;
