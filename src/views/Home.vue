@@ -36,12 +36,12 @@ let Home = {
       this.suggestions.unshift(selected)
     },
     newSearch() {
-      this.$emit('lighten')
       this.restaurant = []
       this.image = null
       this.search = {}
       this.selectedCategories = []
       this.showCards = false
+      this.$router.push({ name: 'search' })
     },
     nextCard() {
       this.restaurant.shift()
@@ -103,6 +103,10 @@ let Home = {
           },
         })
         .then(function(response) {
+          if (response.data.total === 0) {
+            vm.$router.push({ name: 'search' })
+            window.alert('no matches found')
+          }
           response.data.total >= 1000 ? (vm.totalRestaurants = 999) : (vm.totalRestaurants = response.data.total)
           const offset = Math.floor(Math.random() * vm.totalRestaurants + 1)
           return axios.get(vm.api, {
