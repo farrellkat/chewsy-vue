@@ -189,7 +189,7 @@ export default Home
   align-items: center;
   justify-content: flex-start;
   & button {
-    margin-bottom: 1rem;
+    margin-top: 1rem;
   }
   & .action-container {
     border: 4px solid darkgoldenrod;

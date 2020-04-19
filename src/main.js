@@ -6,6 +6,7 @@ import VueAxios from 'vue-axios'
 import VueTidyRoutes from 'vue-tidyroutes'
 import VueRouter from 'vue-router'
 import AnimateCSS from 'animate.css'
+import VueTouchEvents from 'vue2-touch-events'
 import '@/components/index'
 import '@/theme/site.css'
 
@@ -15,6 +16,7 @@ import './views/home'
 Vue.use(VueAxios, axios)
 Vue.use(VueRouter)
 Vue.use(AnimateCSS)
+Vue.use(VueTouchEvents)
 
 Vue.directive('lowercase', {
   update: function(el) {
