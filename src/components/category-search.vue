@@ -128,8 +128,7 @@ export default {
   & .selected-categories {
     grid-area: selected;
     display: flex;
-    margin: auto;
-    justify-content: center;
+    justify-content: space-evenly;
     flex-wrap: wrap;
   }
   & .radius {

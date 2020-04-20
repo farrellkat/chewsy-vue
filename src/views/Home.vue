@@ -189,11 +189,10 @@ export default Home
 
 <template lang="pug">
   .home.vp-panel.vp-pad
-    router-view(@search="(val) => getLocationAndSearch(val)" @remove="removeCategory" @suggestions="val => this.suggestions = val" @next="nextCard" :params="{selectedCategories, manualInput, restaurant}") 
+    router-view(@search="(val) => getLocationAndSearch(val)" @newSearch="newSearch" @remove="removeCategory" @suggestions="val => this.suggestions = val" @next="nextCard" :params="{selectedCategories, manualInput, restaurant, processing}") 
     .suggestions
       template(v-for="(suggestion, index) in suggestions")
         .pill.hover(@click="addCategory(suggestion, index)") {{ suggestion.title }}
-    button(v-if="!processing && showCards" @click="newSearch") New Search
 </template>
 <style lang="postcss" scoped>
 .home {

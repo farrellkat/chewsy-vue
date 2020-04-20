@@ -7,6 +7,10 @@ html {
   background-color: pink;
 }
 
+.white {
+  background-color: white;
+}
+
 input {
   border: 1px solid darkgoldenrod;
   border-radius: 30px;
@@ -30,7 +34,7 @@ button {
   font-size: 1rem;
   background-color: white;
 }
-button:hover {
+button.pink:hover {
   background-color: pink;
   border-color: pink;
   color: white;
@@ -38,7 +42,7 @@ button:hover {
 }
 .pill {
   padding: 1rem;
-  margin: 0.5rem;
+  margin-bottom: 0.5rem;
   background-color: pink;
   border-radius: 20px;
   width: 7rem;

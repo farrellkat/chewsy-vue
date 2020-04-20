@@ -18,6 +18,9 @@ export default {
   router-view
 </template>
 <style lang="postcss" scoped>
+.default {
+  border-radius: 15px;
+}
 .default.darken {
   background-color: var(--dark-blue);
   background-image: none !important;

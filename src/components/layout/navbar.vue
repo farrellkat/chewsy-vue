@@ -9,10 +9,10 @@ export default {
 }
 </script>
 <template lang="pug">
-.navbar
-  router-link(to="/home/search") Home
-  span |
-  router-link(to="/about") About
+//- .navbar
+//-   router-link(to="/home/search") Home
+//-   span |
+//-   router-link(to="/about") About
 </template>
 <style lang="postcss" scoped>
 .navbar {
