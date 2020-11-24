@@ -9,6 +9,8 @@ let Home = {
     return {
       yelp: process.env.VUE_APP_YELP,
       api: process.env.VUE_APP_API,
+      key: process.env.VUE_APP_GOOGLE_KEY,
+      geo: process.env.VUE_APP_GOOGLE_URL,
       processing: false,
       restaurant: [],
       image: null,
@@ -75,6 +77,19 @@ let Home = {
         .catch(function(error) {
           vm.processing = false
           console.log(error)
+        })
+    },
+    reverseGeo() {
+      const vm = this
+      axios
+        .get(vm.geo, {
+          params: {
+            latlng: vm.latitude + ',' + vm.longitude,
+            key: vm.key,
+          },
+        })
+        .then(function(response) {
+          console.log(response)
         })
     },
     searchYelp(res) {
@@ -163,6 +178,13 @@ let Home = {
         if (val.length >= 1 && val.length <= 5) this.stackDeck()
       },
     },
+    location: {
+      handler: function(val, _oldVal) {
+        if (val !== _oldVal) {
+          this.reverseGeo()
+        }
+      },
+    },
   },
 }
 VueTidyRoutes.route(`/home`, {
@@ -188,11 +210,18 @@ export default Home
 </script>
 
 <template lang="pug">
-  .home.vp-panel.vp-pad
-    router-view(@search="(val) => getLocationAndSearch(val)" @newSearch="newSearch" @remove="removeCategory" @suggestions="val => this.suggestions = val" @next="nextCard" :params="{selectedCategories, manualInput, restaurant, processing}") 
-    .suggestions
-      template(v-for="(suggestion, index) in suggestions")
-        .pill.hover(@click="addCategory(suggestion, index)") {{ suggestion.title }}
+.home.vp-panel.vp-pad
+  router-view(
+    @search='(val) => getLocationAndSearch(val)',
+    @newSearch='newSearch',
+    @remove='removeCategory',
+    @suggestions='(val) => (this.suggestions = val)',
+    @next='nextCard',
+    :params='{ selectedCategories, manualInput, restaurant, processing }'
+  ) 
+  .suggestions
+    template(v-for='(suggestion, index) in suggestions')
+      .pill.hover(@click='addCategory(suggestion, index)') {{ suggestion.title }}
 </template>
 <style lang="postcss" scoped>
 .home {
