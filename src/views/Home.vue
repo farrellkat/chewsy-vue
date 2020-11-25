@@ -37,23 +37,63 @@ let Home = {
     getLocation() {
       const vm = this
       this.processing = true
-      search ? (this.search = search) : {}
-      return new Promise(function(resolve, reject) {
+      return new Promise(function (resolve, reject) {
         navigator.geolocation.getCurrentPosition(resolve, reject)
       })
-        .then(resolve => {
+        .then((resolve) => {
           vm.latitude = resolve.coords.latitude
           vm.longitude = resolve.coords.longitude
           vm.location = { latitude: vm.latitude, longitude: vm.longitude }
           vm.reverseGeo()
         })
-        .catch(_reject => {
+        .catch((_reject) => {
           if (!this.manualInput) {
             window.alert('Could not find your location')
             this.manualInput = true
             this.processing = false
           }
         })
+    },
+    getLatLong(location) {
+      const vm = this
+      const convertedLocation = location.split(' ').join('+')
+      axios
+        .get(vm.geo, {
+          params: {
+            address: convertedLocation,
+            key: vm.key,
+          },
+        })
+        .then(function (response) {
+          console.log(response)
+          const result = response.data.results[0]
+          vm.latitude = result.geometry.location.lat
+          vm.longitude = result.geometry.location.lng
+          vm.location = { latitude: vm.latitude, longitude: vm.longitude }
+        })
+    },
+    reverseGeo() {
+      const vm = this
+      axios
+        .get(vm.geo, {
+          params: {
+            latlng: vm.latitude + ',' + vm.longitude,
+            key: vm.key,
+          },
+        })
+        .then(function (response) {
+          console.log(response)
+          vm.formattedLocation =
+            response.data.results[4].address_components[0].long_name +
+            ', ' +
+            response.data.results[4].address_components[3].short_name
+          vm.processing = false
+        })
+    },
+    updateLocation(location) {
+      this.formattedLocation = location
+      this.location = location
+      this.getLatLong(location)
     },
     addCategory(alias, index) {
       this.selectedCategories.push(alias)
@@ -69,6 +109,7 @@ let Home = {
       this.search = {}
       this.selectedCategories = []
       this.showCards = false
+      this.getLocation()
       this.$router.push({ name: 'search' })
     },
     nextCard() {
@@ -91,7 +132,7 @@ let Home = {
             Authorization: `Bearer ${vm.yelp}`,
           },
         })
-        .then(response => {
+        .then((response) => {
           if (response.data.businesses.length && response.data.businesses[0].image_url !== '') {
             vm.restaurant.push(response.data.businesses[0])
             vm.image = response.data.businesses[0].image_url
@@ -100,42 +141,20 @@ let Home = {
             vm.stackDeck
           }
         })
-        .catch(function(error) {
+        .catch(function (error) {
           vm.processing = false
           console.log(error)
         })
     },
-    reverseGeo() {
+    searchYelp(search) {
       const vm = this
-      axios
-        .get(vm.geo, {
-          params: {
-            latlng: vm.latitude + ',' + vm.longitude,
-            key: vm.key,
-          },
-        })
-        .then(function(response) {
-          console.log(response)
-          vm.formattedLocation =
-            response.data.results[4].address_components[0].long_name +
-            ', ' +
-            response.data.results[4].address_components[3].short_name
-        })
-    },
-    searchYelp(res) {
-      const vm = this
+      vm.processing = true
       const categoryArray = []
+      vm.suggestions = []
+      search ? (this.search = search) : {}
       vm.showCards = true
-      vm.search.categories.map(x => categoryArray.push(x.alias))
+      vm.search.categories.map((x) => categoryArray.push(x.alias))
       vm.categoryString = categoryArray.join(',')
-      if (res !== null) {
-        const position = res
-        vm.latitude = position.coords.latitude
-        vm.longitude = position.coords.longitude
-        vm.location = { latitude: vm.latitude, longitude: vm.longitude }
-      } else {
-        vm.location = { location: vm.search.manualLocation }
-      }
       return axios
         .get(vm.api, {
           params: {
@@ -147,7 +166,7 @@ let Home = {
             Authorization: `Bearer ${vm.yelp}`,
           },
         })
-        .then(function(response) {
+        .then(function (response) {
           if (response.data.total === 0) {
             vm.$router.push({ name: 'search' })
             window.alert('no matches found')
@@ -167,7 +186,7 @@ let Home = {
             },
           })
         })
-        .then(response => {
+        .then((response) => {
           if (response.data.businesses.length && response.data.businesses[0].image_url !== '') {
             vm.restaurant.push(response.data.businesses[0])
             vm.image = response.data.businesses[0].image_url
@@ -176,35 +195,35 @@ let Home = {
             vm.searchYelp
           }
         })
-        .catch(function(error) {
+        .catch(function (error) {
           vm.processing = false
           console.log(error)
         })
     },
-    async getLocationAndSearch(search) {
-      this.suggestions = []
-      this.processing = true
-      search ? (this.search = search) : {}
-      return new Promise(function(resolve, reject) {
-        navigator.geolocation.getCurrentPosition(resolve, reject)
-      })
-        .then(resolve => {
-          this.searchYelp(resolve)
-        })
-        .catch(_reject => {
-          if (!this.manualInput) {
-            window.alert('Could not find your location')
-            this.manualInput = true
-            this.processing = false
-          } else {
-            this.searchYelp(null)
-          }
-        })
-    },
+    // async getLocationAndSearch(search) {
+    //   this.suggestions = []
+    //   this.processing = true
+    //   search ? (this.search = search) : {}
+    //   return new Promise(function(resolve, reject) {
+    //     navigator.geolocation.getCurrentPosition(resolve, reject)
+    //   })
+    //     .then(resolve => {
+    //       this.searchYelp(resolve)
+    //     })
+    //     .catch(_reject => {
+    //       if (!this.manualInput) {
+    //         window.alert('Could not find your location')
+    //         this.manualInput = true
+    //         this.processing = false
+    //       } else {
+    //         this.searchYelp(null)
+    //       }
+    //     })
+    // },
   },
   watch: {
     restaurant: {
-      handler: function(val, _oldVal) {
+      handler: function (val, _oldVal) {
         if (val.length >= 1 && val.length <= 5) this.stackDeck()
       },
     },
@@ -235,16 +254,17 @@ export default Home
 <template lang="pug">
 .home.vp-panel.vp-pad
   router-view(
-    @search='(val) => getLocationAndSearch(val)',
+    @search='(val) => searchYelp(val)',
     @newSearch='newSearch',
     @remove='removeCategory',
-    @manual='(val) => this.manualInput = val'
-    @findMyLocation='getLocation()'
+    @manual='(val) => (this.manualInput = val)',
+    @saveLocation='(val) => updateLocation(val)',
+    @findMyLocation='getLocation()',
     @suggestions='(val) => (this.suggestions = val)',
     @next='nextCard',
     :params='{ selectedCategories, manualInput, restaurant, processing, formattedLocation }'
   ) 
-  .suggestions(v-if="!manualInput")
+  .suggestions
     template(v-for='(suggestion, index) in suggestions')
       .pill.hover(@click='addCategory(suggestion, index)') {{ suggestion.title }}
 </template>

@@ -6,10 +6,10 @@ export default {
 
   data() {
     const params = this.$attrs.params
-    const all = categoriesJSON.filter((x) => x.parents.find((y) => y === 'food' || y === 'restaurants'))
+    const all = categoriesJSON.filter(x => x.parents.find(y => y === 'food' || y === 'restaurants'))
     let filtered = all.reduce((a, c) => {
       if (
-        (c.country_whitelist?.find((x) => x === 'US') && c.country_blacklist?.find((y) => y === 'US') === undefined) ||
+        (c.country_whitelist?.find(x => x === 'US') && c.country_blacklist?.find(y => y === 'US') === undefined) ||
         c.country_whitelist === undefined
       ) {
         a.push(c)
@@ -47,7 +47,7 @@ export default {
         radius: this.radius,
         manualLocation: this.manualLocation,
       }
-      this.$router.push({ name: 'cards' }).catch((err) => {
+      this.$router.push({ name: 'cards' }).catch(err => {
         console.log(err)
       })
       this.$emit('search', search)
@@ -60,17 +60,19 @@ export default {
       this.showLocationLink = false
     },
     saveManualLocation() {
-      this.$emit('manualLocation', this.manualLocation)
+      this.$emit('saveLocation', this.manualLocation)
       this.showLocationLink = true
     },
     findMyLocation() {
+      this.inputPlaceholder = 'Determining your location...'
+      this.manualLocation = ''
       this.$emit('findMyLocation')
     },
     autocomplete() {
       const vm = this
       if (vm.term.length >= 1) {
         let filterWithoutSelected = vm.filtered.reduce((a, c) => {
-          if (vm.categories.find((x) => x.alias === c.alias) === undefined) {
+          if (vm.categories.find(x => x.alias === c.alias) === undefined) {
             a.push(c)
           }
           return a
@@ -95,9 +97,8 @@ export default {
       }
     },
     '$attrs.params': {
-      handler(newVal, oldVal) {
-        if (newVal.formattedLocation !== oldVal.formattedLocation)
-          this.inputPlaceholder = 'Search ' + newVal.formattedLocation
+      handler(newVal) {
+        if (newVal.processing === false) this.inputPlaceholder = 'Search ' + newVal.formattedLocation
       },
     },
   },
@@ -112,7 +113,7 @@ export default {
         v-model='term',
         @input='autocomplete',
         @focus='inputPlaceholder = ""',
-        @blur='inputPlaceholder = searchPlaceholder',
+        @blur='inputPlaceholder = "Search " + location',
         :placeholder='inputPlaceholder',
         v-lowercase
       )
