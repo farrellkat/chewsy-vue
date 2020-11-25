@@ -1,7 +1,6 @@
 <script>
 export default {
   name: 'navbar',
-  props: ['darken'],
   data() {
     return {}
   },
@@ -10,10 +9,10 @@ export default {
 }
 </script>
 <template lang="pug">
-.navbar(:class="darken ? 'darken' : 'lighten'")
-  router-link(to="/home") Home
-  span |
-  router-link(to="/about") About
+//- .navbar
+//-   router-link(to="/home/search") Home
+//-   span |
+//-   router-link(to="/about") About
 </template>
 <style lang="postcss" scoped>
 .navbar {
@@ -35,16 +34,4 @@ export default {
     background-color: black;
   }
 }
-/* .navbar.darken {
-  background-color: var(--dark-blue);
-  background-image: none !important;
-  -o-animation: fade-to-dark 1s forwards;
-  animation: fade-to-dark 1s forwards;
-}
-.navbar.lighten {
-  background-color: white;
-  background-image: none !important;
-  -o-animation: fade-to-light 1s forwards;
-  animation: fade-to-light 1s forwards;
-} */
 </style>

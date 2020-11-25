@@ -10,8 +10,9 @@ import VueTouchEvents from 'vue2-touch-events'
 import '@/components/index'
 import '@/theme/site.css'
 
-import './views/home'
-// import './components/category-search'
+import './views/Home'
+import './components/category-search'
+import './components/card-view'
 
 Vue.use(VueAxios, axios)
 Vue.use(VueRouter)

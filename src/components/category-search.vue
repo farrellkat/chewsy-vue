@@ -3,9 +3,9 @@ import categoriesJSON from '../../categories.json'
 
 export default {
   name: 'category-search',
-  props: ['manualInput', 'selectedCategories'],
 
   data() {
+    const params = this.$attrs.params
     const all = categoriesJSON.filter(x => x.parents.find(y => y === 'food' || y === 'restaurants'))
     let filtered = all.reduce((a, c) => {
       if (
@@ -20,10 +20,12 @@ export default {
       term: '',
       filtered: filtered,
       categoriesJSON,
-      categories: this.selectedCategories || [],
+      showLocationLink: true,
+      location: params.formattedLocation,
+      categories: this.$attrs.params.selectedCategories || [],
       manualLocation: '',
       radius: null,
-      inputPlaceholder: 'Search categories',
+      inputPlaceholder: 'Determining your location...',
       options: [
         { string: '1 mile', value: 1609 },
         { string: '3 miles', value: 1609 * 3 },
@@ -45,10 +47,26 @@ export default {
         radius: this.radius,
         manualLocation: this.manualLocation,
       }
+      this.$router.push({ name: 'cards' }).catch(err => {
+        console.log(err)
+      })
       this.$emit('search', search)
     },
     removeCategory(selected, index) {
       this.$emit('remove', selected, index)
+    },
+    showManualLocation() {
+      this.$emit('manual', true)
+      this.showLocationLink = false
+    },
+    saveManualLocation() {
+      this.$emit('saveLocation', this.manualLocation)
+      this.showLocationLink = true
+    },
+    findMyLocation() {
+      this.inputPlaceholder = 'Determining your location...'
+      this.manualLocation = ''
+      this.$emit('findMyLocation')
     },
     autocomplete() {
       const vm = this
@@ -66,7 +84,6 @@ export default {
           return a
         }, [])
         this.$emit('suggestions', prediction)
-        // vm.suggestions = prediction
       }
     },
   },
@@ -79,25 +96,43 @@ export default {
         this.$emit('suggestions', this.filtered)
       }
     },
+    '$attrs.params': {
+      handler(newVal) {
+        if (newVal.processing === false) this.inputPlaceholder = 'Search ' + newVal.formattedLocation
+      },
+    },
   },
 }
 </script>
 <template lang="pug">
-.category-search
+.category-search(v-if='showLocationLink')
   .search-form
-    input(id="search" autocomplete="off" v-model="term" @input="autocomplete" @focus="inputPlaceholder = ''" @blur="inputPlaceholder = 'Search categories'" :placeholder="inputPlaceholder" v-lowercase)
+    .input-grid
+      input#search(
+        autocomplete='off',
+        v-model='term',
+        @input='autocomplete',
+        @focus='inputPlaceholder = ""',
+        @blur='inputPlaceholder = "Search " + location',
+        :placeholder='inputPlaceholder',
+        v-lowercase
+      )
+      i.material-icons(@click='showManualLocation', v-if='showLocationLink') edit_location
+      i.material-icons(@click='findMyLocation', v-if='showLocationLink') my_location
     .radius 
-      template(v-for="option in options")
-        .circle-select.hover(@click="selectRadius(option.value)" :class="active(option.value)")
+      template(v-for='option in options')
+        .circle-select.hover(@click='selectRadius(option.value)', :class='active(option.value)')
           .circle-name {{ option.string }}
-    .selected-categories
-      template(v-for="(selected,index) in categories")
-        .pill.delete-pill.inverse.hover(@click="removeCategory(selected,index)") {{ selected.title }}
+    .selected-categories(v-if='categories.length')
+      template(v-for='(selected, index) in categories')
+        .pill.delete-pill.inverse.hover(@click='removeCategory(selected, index)') {{ selected.title }}
           .close x
-    button(v-if="categories.length" @click="searchYelp") search
-    .manual-input(v-if="manualInput")
-      label(for='city-input') Location
-      input(id='city-input' v-model="manualLocation")
+    button(v-if='categories.length', @click='searchYelp') search
+.manual-input(v-else)
+  h2 Enter your location
+  .location-grid
+    input(v-model='manualLocation', placeholder='e.g. Nashville, TN 37206')
+    button.save-location(@click='saveManualLocation') save
 </template>
 <style lang="postcss" scoped>
 .category-search {
@@ -107,16 +142,16 @@ export default {
     margin: 0 0 1rem 0;
   }
   & .search-form {
+    padding: 1rem;
     display: grid;
     grid-row-gap: 1rem;
-    grid-template-columns: 1fr 1fr 1fr;
+    grid-template-columns: 1fr;
     grid-template-areas:
-      '. input .'
-      '. radius. '
-      'selected selected selected '
-      '. search. ';
+      'input'
+      'radius'
+      'selected'
+      'search';
     & input {
-      grid-area: input;
       text-align: center;
       text-indent: 0;
     }
@@ -127,8 +162,7 @@ export default {
   & .selected-categories {
     grid-area: selected;
     display: flex;
-    margin: auto;
-    justify-content: center;
+    justify-content: space-evenly;
     flex-wrap: wrap;
   }
   & .radius {
@@ -138,7 +172,49 @@ export default {
     width: 100%;
   }
 }
-
+.input-grid {
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  align-items: center;
+  grid-gap: 1rem;
+  & input {
+    width: 100%;
+    padding-right: 0;
+    padding-left: 0;
+  }
+}
+.location-grid {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  margin: 0 1rem;
+}
+.save-location {
+  display: flex;
+  background-color: goldenrod;
+  height: 100%;
+  justify-content: center;
+  align-items: center;
+  width: 36px;
+  border-radius: 30px;
+}
+.manual-input {
+  width: 100%;
+  padding: 2rem;
+  display: inline;
+  & h2 {
+    margin-top: 0;
+  }
+  & input {
+    border-radius: 30px 0 0 30px;
+    border-right: 0;
+  }
+  & button {
+    width: 6rem;
+    border-radius: 0 30px 30px 0;
+    background: goldenrod;
+    color: white;
+  }
+}
 /* Small devices (landscape phones, 576px and up) */
 @media (min-width: 576px) {
   .search-form {

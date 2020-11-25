@@ -1,14 +1,18 @@
 <script>
 import VueTidyRoutes from 'vue-tidyroutes'
-// import categorySearch from '../components/category-search'
-// import cardView from '../components/card-view'
 import axios from 'axios'
+import Search from '../components/category-search'
+import Cards from '../components/card-view'
 
 let Home = {
   data() {
     return {
       yelp: process.env.VUE_APP_YELP,
       api: process.env.VUE_APP_API,
+      key: process.env.VUE_APP_GOOGLE_KEY,
+      geo: process.env.VUE_APP_GOOGLE_URL,
+      formattedLocation: '',
+      position: '',
       processing: false,
       restaurant: [],
       image: null,
@@ -26,7 +30,71 @@ let Home = {
     }
   },
   computed: {},
+  async mounted() {
+    await this.getLocation()
+  },
   methods: {
+    getLocation() {
+      const vm = this
+      this.processing = true
+      return new Promise(function (resolve, reject) {
+        navigator.geolocation.getCurrentPosition(resolve, reject)
+      })
+        .then((resolve) => {
+          vm.latitude = resolve.coords.latitude
+          vm.longitude = resolve.coords.longitude
+          vm.location = { latitude: vm.latitude, longitude: vm.longitude }
+          vm.reverseGeo()
+        })
+        .catch((_reject) => {
+          if (!this.manualInput) {
+            window.alert('Could not find your location')
+            this.manualInput = true
+            this.processing = false
+          }
+        })
+    },
+    getLatLong(location) {
+      const vm = this
+      const convertedLocation = location.split(' ').join('+')
+      axios
+        .get(vm.geo, {
+          params: {
+            address: convertedLocation,
+            key: vm.key,
+          },
+        })
+        .then(function (response) {
+          console.log(response)
+          const result = response.data.results[0]
+          vm.latitude = result.geometry.location.lat
+          vm.longitude = result.geometry.location.lng
+          vm.location = { latitude: vm.latitude, longitude: vm.longitude }
+        })
+    },
+    reverseGeo() {
+      const vm = this
+      axios
+        .get(vm.geo, {
+          params: {
+            latlng: vm.latitude + ',' + vm.longitude,
+            key: vm.key,
+          },
+        })
+        .then(function (response) {
+          console.log(response)
+          vm.formattedLocation =
+            response.data.results[4].address_components[0].long_name +
+            ', ' +
+            response.data.results[4].address_components[3].short_name
+          vm.processing = false
+        })
+    },
+    updateLocation(location) {
+      this.formattedLocation = location
+      this.location = location
+      this.getLatLong(location)
+    },
     addCategory(alias, index) {
       this.selectedCategories.push(alias)
       this.suggestions.splice(index, 1)
@@ -36,12 +104,13 @@ let Home = {
       this.suggestions.unshift(selected)
     },
     newSearch() {
-      this.$emit('lighten')
       this.restaurant = []
       this.image = null
       this.search = {}
       this.selectedCategories = []
       this.showCards = false
+      this.getLocation()
+      this.$router.push({ name: 'search' })
     },
     nextCard() {
       this.restaurant.shift()
@@ -63,7 +132,7 @@ let Home = {
             Authorization: `Bearer ${vm.yelp}`,
           },
         })
-        .then(response => {
+        .then((response) => {
           if (response.data.businesses.length && response.data.businesses[0].image_url !== '') {
             vm.restaurant.push(response.data.businesses[0])
             vm.image = response.data.businesses[0].image_url
@@ -72,25 +141,20 @@ let Home = {
             vm.stackDeck
           }
         })
-        .catch(function(error) {
+        .catch(function (error) {
           vm.processing = false
           console.log(error)
         })
     },
-    searchYelp(res) {
+    searchYelp(search) {
       const vm = this
+      vm.processing = true
       const categoryArray = []
+      vm.suggestions = []
+      search ? (this.search = search) : {}
       vm.showCards = true
-      vm.search.categories.map(x => categoryArray.push(x.alias))
+      vm.search.categories.map((x) => categoryArray.push(x.alias))
       vm.categoryString = categoryArray.join(',')
-      if (res !== null) {
-        const position = res
-        vm.latitude = position.coords.latitude
-        vm.longitude = position.coords.longitude
-        vm.location = { latitude: vm.latitude, longitude: vm.longitude }
-      } else {
-        vm.location = { location: vm.search.manualLocation }
-      }
       return axios
         .get(vm.api, {
           params: {
@@ -102,7 +166,11 @@ let Home = {
             Authorization: `Bearer ${vm.yelp}`,
           },
         })
-        .then(function(response) {
+        .then(function (response) {
+          if (response.data.total === 0) {
+            vm.$router.push({ name: 'search' })
+            window.alert('no matches found')
+          }
           response.data.total >= 1000 ? (vm.totalRestaurants = 999) : (vm.totalRestaurants = response.data.total)
           const offset = Math.floor(Math.random() * vm.totalRestaurants + 1)
           return axios.get(vm.api, {
@@ -118,7 +186,7 @@ let Home = {
             },
           })
         })
-        .then(response => {
+        .then((response) => {
           if (response.data.businesses.length && response.data.businesses[0].image_url !== '') {
             vm.restaurant.push(response.data.businesses[0])
             vm.image = response.data.businesses[0].image_url
@@ -127,36 +195,35 @@ let Home = {
             vm.searchYelp
           }
         })
-        .catch(function(error) {
+        .catch(function (error) {
           vm.processing = false
           console.log(error)
         })
     },
-    async getLocationAndSearch(search) {
-      this.$emit('darken')
-      this.suggestions = []
-      this.processing = true
-      search ? (this.search = search) : {}
-      return new Promise(function(resolve, reject) {
-        navigator.geolocation.getCurrentPosition(resolve, reject)
-      })
-        .then(resolve => {
-          this.searchYelp(resolve)
-        })
-        .catch(_reject => {
-          if (!this.manualInput) {
-            window.alert('Could not find your location')
-            this.manualInput = true
-            this.processing = false
-          } else {
-            this.searchYelp(null)
-          }
-        })
-    },
+    // async getLocationAndSearch(search) {
+    //   this.suggestions = []
+    //   this.processing = true
+    //   search ? (this.search = search) : {}
+    //   return new Promise(function(resolve, reject) {
+    //     navigator.geolocation.getCurrentPosition(resolve, reject)
+    //   })
+    //     .then(resolve => {
+    //       this.searchYelp(resolve)
+    //     })
+    //     .catch(_reject => {
+    //       if (!this.manualInput) {
+    //         window.alert('Could not find your location')
+    //         this.manualInput = true
+    //         this.processing = false
+    //       } else {
+    //         this.searchYelp(null)
+    //       }
+    //     })
+    // },
   },
   watch: {
     restaurant: {
-      handler: function(val, _oldVal) {
+      handler: function (val, _oldVal) {
         if (val.length >= 1 && val.length <= 5) this.stackDeck()
       },
     },
@@ -165,22 +232,41 @@ let Home = {
 VueTidyRoutes.route(`/home`, {
   name: 'home',
   component: Home,
+  children: [
+    {
+      name: 'search',
+      path: 'search',
+      component: Search,
+      props: true,
+    },
+    {
+      name: 'cards',
+      path: 'cards',
+      component: Cards,
+      props: true,
+    },
+  ],
 })
 
 export default Home
 </script>
 
 <template lang="pug">
-  .home.vp-panel.vp-pad
-    transition(name="custom-classes-transition" enter-active-class="animated fadeIn" leave-active-class="animated fadeOut")
-      category-search(v-if="!processing && restaurant.length === 0" @search="(val) => getLocationAndSearch(val)" @remove="removeCategory" @suggestions="val => this.suggestions = val" :manualInput="this.manualInput" :selectedCategories="this.selectedCategories")
-    .action-container(v-if="suggestions.length || restaurant.length")
-      .suggestions(v-if="!processing && restaurant.length === 0")
-        template(v-for="(suggestion, index) in suggestions")
-          .pill.hover(@click="addCategory(suggestion, index)") {{ suggestion.title }}
-      transition(name="custom-classes-transition" enter-active-class="animated fadeInLeft" leave-active-class="animated fadeOutRight")
-        card-view(v-if="showCards" :restaurant="restaurant[0]" :image="restaurant[0].image_url" @next="nextCard")
-    button(v-if="!processing && showCards" @click="newSearch") New Search
+.home.vp-panel.vp-pad
+  router-view(
+    @search='(val) => searchYelp(val)',
+    @newSearch='newSearch',
+    @remove='removeCategory',
+    @manual='(val) => (this.manualInput = val)',
+    @saveLocation='(val) => updateLocation(val)',
+    @findMyLocation='getLocation()',
+    @suggestions='(val) => (this.suggestions = val)',
+    @next='nextCard',
+    :params='{ selectedCategories, manualInput, restaurant, processing, formattedLocation }'
+  ) 
+  .suggestions
+    template(v-for='(suggestion, index) in suggestions')
+      .pill.hover(@click='addCategory(suggestion, index)') {{ suggestion.title }}
 </template>
 <style lang="postcss" scoped>
 .home {
@@ -190,12 +276,6 @@ export default Home
   justify-content: flex-start;
   & button {
     margin-top: 1rem;
-  }
-  & .action-container {
-    border: 4px solid darkgoldenrod;
-    background-color: white;
-    border-radius: 15px;
-    display: flex;
   }
   & .suggestions {
     display: flex;
