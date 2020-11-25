@@ -11,6 +11,8 @@ let Home = {
       api: process.env.VUE_APP_API,
       key: process.env.VUE_APP_GOOGLE_KEY,
       geo: process.env.VUE_APP_GOOGLE_URL,
+      formattedLocation: '',
+      position: '',
       processing: false,
       restaurant: [],
       image: null,
@@ -28,7 +30,31 @@ let Home = {
     }
   },
   computed: {},
+  async mounted() {
+    await this.getLocation()
+  },
   methods: {
+    getLocation() {
+      const vm = this
+      this.processing = true
+      search ? (this.search = search) : {}
+      return new Promise(function(resolve, reject) {
+        navigator.geolocation.getCurrentPosition(resolve, reject)
+      })
+        .then(resolve => {
+          vm.latitude = resolve.coords.latitude
+          vm.longitude = resolve.coords.longitude
+          vm.location = { latitude: vm.latitude, longitude: vm.longitude }
+          vm.reverseGeo()
+        })
+        .catch(_reject => {
+          if (!this.manualInput) {
+            window.alert('Could not find your location')
+            this.manualInput = true
+            this.processing = false
+          }
+        })
+    },
     addCategory(alias, index) {
       this.selectedCategories.push(alias)
       this.suggestions.splice(index, 1)
@@ -90,6 +116,10 @@ let Home = {
         })
         .then(function(response) {
           console.log(response)
+          vm.formattedLocation =
+            response.data.results[4].address_components[0].long_name +
+            ', ' +
+            response.data.results[4].address_components[3].short_name
         })
     },
     searchYelp(res) {
@@ -178,13 +208,6 @@ let Home = {
         if (val.length >= 1 && val.length <= 5) this.stackDeck()
       },
     },
-    location: {
-      handler: function(val, _oldVal) {
-        if (val !== _oldVal) {
-          this.reverseGeo()
-        }
-      },
-    },
   },
 }
 VueTidyRoutes.route(`/home`, {
@@ -215,11 +238,13 @@ export default Home
     @search='(val) => getLocationAndSearch(val)',
     @newSearch='newSearch',
     @remove='removeCategory',
+    @manual='(val) => this.manualInput = val'
+    @findMyLocation='getLocation()'
     @suggestions='(val) => (this.suggestions = val)',
     @next='nextCard',
-    :params='{ selectedCategories, manualInput, restaurant, processing }'
+    :params='{ selectedCategories, manualInput, restaurant, processing, formattedLocation }'
   ) 
-  .suggestions
+  .suggestions(v-if="!manualInput")
     template(v-for='(suggestion, index) in suggestions')
       .pill.hover(@click='addCategory(suggestion, index)') {{ suggestion.title }}
 </template>
