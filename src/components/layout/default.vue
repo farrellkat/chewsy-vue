@@ -20,6 +20,7 @@ export default {
 <style lang="postcss" scoped>
 .default {
   border-radius: 15px;
+  height: inherit;
 }
 .default.darken {
   background-color: var(--dark-blue);

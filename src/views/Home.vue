@@ -200,26 +200,6 @@ let Home = {
           console.log(error)
         })
     },
-    // async getLocationAndSearch(search) {
-    //   this.suggestions = []
-    //   this.processing = true
-    //   search ? (this.search = search) : {}
-    //   return new Promise(function(resolve, reject) {
-    //     navigator.geolocation.getCurrentPosition(resolve, reject)
-    //   })
-    //     .then(resolve => {
-    //       this.searchYelp(resolve)
-    //     })
-    //     .catch(_reject => {
-    //       if (!this.manualInput) {
-    //         window.alert('Could not find your location')
-    //         this.manualInput = true
-    //         this.processing = false
-    //       } else {
-    //         this.searchYelp(null)
-    //       }
-    //     })
-    // },
   },
   watch: {
     restaurant: {
@@ -253,6 +233,8 @@ export default Home
 
 <template lang="pug">
 .home.vp-panel.vp-pad
+  .title-background 
+    .text Chewsy
   router-view(
     @search='(val) => searchYelp(val)',
     @newSearch='newSearch',
@@ -274,16 +256,21 @@ export default Home
   flex-direction: column;
   align-items: center;
   justify-content: flex-start;
+  height: inherit;
   & button {
     margin-top: 1rem;
   }
   & .suggestions {
     display: flex;
     justify-content: space-around;
+    padding: 0 0.25rem;
     margin: auto;
     border-radius: 15px;
-    padding: 1rem 0;
     flex-wrap: wrap;
+    overflow: scroll;
   }
+}
+.title-background {
+  margin-top: 1rem;
 }
 </style>

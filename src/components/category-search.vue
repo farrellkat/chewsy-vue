@@ -127,7 +127,7 @@ export default {
       template(v-for='(selected, index) in categories')
         .pill.delete-pill.inverse.hover(@click='removeCategory(selected, index)') {{ selected.title }}
           .close x
-    button(v-if='categories.length', @click='searchYelp') search
+    button(:class="{dim: !categories.length}", @click='searchYelp') search
 .manual-input(v-else)
   h2 Enter your location
   .location-grid
@@ -144,7 +144,6 @@ export default {
   & .search-form {
     padding: 1rem;
     display: grid;
-    grid-row-gap: 1rem;
     grid-template-columns: 1fr;
     grid-template-areas:
       'input'
@@ -162,15 +161,22 @@ export default {
   & .selected-categories {
     grid-area: selected;
     display: flex;
-    justify-content: space-evenly;
-    flex-wrap: wrap;
+    overflow: scroll;
+    padding: 0 0 1rem 0;
+    & .pill.inverse {
+      margin-right: 0.5rem;
+    }
   }
   & .radius {
+    padding: 1rem 0;
     grid-area: radius;
     display: flex;
     justify-content: space-between;
     width: 100%;
   }
+}
+.dim {
+  opacity: 0.25;
 }
 .input-grid {
   display: grid;

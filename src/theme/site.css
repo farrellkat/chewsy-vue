@@ -6,7 +6,11 @@
 html {
   background-color: pink;
 }
-
+body {
+  height: 98vh;
+  display: flex;
+  flex-direction: column;
+}
 .white {
   background-color: white;
 }
@@ -45,8 +49,8 @@ button.pink:hover {
   margin-bottom: 0.5rem;
   background-color: pink;
   border-radius: 20px;
-  width: 7rem;
   text-align: center;
+  white-space: nowrap;
 }
 .delete-pill {
   display: grid;
@@ -129,9 +133,6 @@ button.pink:hover {
   .vp-pad {
     padding: 2rem 1rem;
   } 
-  input {
-    font-size: 1.5rem;
-  }
 }
 /* Small devices (landscape phones, 576px and up) */
 @media (min-width: 576px) {  
@@ -150,7 +151,9 @@ button.pink:hover {
 
 /* Large devices (desktops, 992px and up) */
 @media (min-width: 992px) {  
-
+  input {
+    font-size: 1.5rem;
+  }
 }
 
 /* Extra large devices (large desktops, 1200px and up) */
