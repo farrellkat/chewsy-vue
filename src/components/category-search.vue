@@ -6,10 +6,10 @@ export default {
 
   data() {
     const params = this.$attrs.params
-    const all = categoriesJSON.filter(x => x.parents.find(y => y === 'food' || y === 'restaurants'))
+    const all = categoriesJSON.filter((x) => x.parents.find((y) => y === 'food' || y === 'restaurants'))
     let filtered = all.reduce((a, c) => {
       if (
-        (c.country_whitelist?.find(x => x === 'US') && c.country_blacklist?.find(y => y === 'US') === undefined) ||
+        (c.country_whitelist?.find((x) => x === 'US') && c.country_blacklist?.find((y) => y === 'US') === undefined) ||
         c.country_whitelist === undefined
       ) {
         a.push(c)
@@ -26,6 +26,7 @@ export default {
       manualLocation: '',
       radius: null,
       inputPlaceholder: 'Determining your location...',
+      searchPlaceholder: 'Search categories',
       options: [
         { string: '1 mile', value: 1609 },
         { string: '3 miles', value: 1609 * 3 },
@@ -47,7 +48,7 @@ export default {
         radius: this.radius,
         manualLocation: this.manualLocation,
       }
-      this.$router.push({ name: 'cards' }).catch(err => {
+      this.$router.push({ name: 'cards' }).catch((err) => {
         console.log(err)
       })
       this.$emit('search', search)
@@ -72,7 +73,7 @@ export default {
       const vm = this
       if (vm.term.length >= 1) {
         let filterWithoutSelected = vm.filtered.reduce((a, c) => {
-          if (vm.categories.find(x => x.alias === c.alias) === undefined) {
+          if (vm.categories.find((x) => x.alias === c.alias) === undefined) {
             a.push(c)
           }
           return a
@@ -106,19 +107,20 @@ export default {
 </script>
 <template lang="pug">
 .category-search(v-if='showLocationLink')
+  .location-holder
+    .city {{ inputPlaceholder }}
+    i.material-icons(@click='showManualLocation', v-if='showLocationLink') edit_location
+    i.material-icons(@click='findMyLocation', v-if='showLocationLink') my_location
   .search-form
-    .input-grid
-      input#search(
-        autocomplete='off',
-        v-model='term',
-        @input='autocomplete',
-        @focus='inputPlaceholder = ""',
-        @blur='inputPlaceholder = "Search " + location',
-        :placeholder='inputPlaceholder',
-        v-lowercase
-      )
-      i.material-icons(@click='showManualLocation', v-if='showLocationLink') edit_location
-      i.material-icons(@click='findMyLocation', v-if='showLocationLink') my_location
+    input#search(
+      autocomplete='off',
+      v-model='term',
+      @input='autocomplete',
+      @focus='searchPlaceholder = ""',
+      @blur='searchPlaceholder = "Search categories"',
+      :placeholder='searchPlaceholder',
+      v-lowercase
+    )
     .radius 
       template(v-for='option in options')
         .circle-select.hover(@click='selectRadius(option.value)', :class='active(option.value)')
@@ -127,7 +129,7 @@ export default {
       template(v-for='(selected, index) in categories')
         .pill.delete-pill.inverse.hover(@click='removeCategory(selected, index)') {{ selected.title }}
           .close x
-    button(:class="{dim: !categories.length}", @click='searchYelp') search
+    button(:class='{ dim: !categories.length }', @click='searchYelp') search
 .manual-input(v-else)
   h2 Enter your location
   .location-grid
@@ -178,16 +180,17 @@ export default {
 .dim {
   opacity: 0.25;
 }
-.input-grid {
-  display: grid;
-  grid-template-columns: 1fr auto auto;
+.location-holder {
+  display: flex;
+  justify-content: center;
   align-items: center;
   grid-gap: 1rem;
-  & input {
-    width: 100%;
-    padding-right: 0;
-    padding-left: 0;
-  }
+  padding: 1rem 0 0 0;
+}
+input {
+  width: 100%;
+  padding-right: 0;
+  padding-left: 0;
 }
 .location-grid {
   display: grid;

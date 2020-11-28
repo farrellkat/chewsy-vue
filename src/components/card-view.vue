@@ -23,14 +23,14 @@ export default {
 .card-view(data-cy='card-view')
   .vp-panel.white
     .loading(v-if="restaurant === undefined") Loading...
-  .restaurant-info(v-if="restaurant") 
-    //- h1.name {{ restaurant.name }}
-    //- .price Price: {{ restaurant.price}}
-    //- .address
-    //-   span(v-for="address in restaurant.location.display_address") {{ address }}
-    //-   a(:href="`tel:${restaurant.phone}`") {{ restaurant.display_phone }}
-    .image-holder(@click="next")
-      img(:src="restaurant.image_url")
+    .restaurant-info(v-if="restaurant") 
+      h1.name {{ restaurant.name }}
+      .price Price: {{ restaurant.price}}
+      .address
+        span(v-for="address in restaurant.location.display_address") {{ address }}
+        a(:href="`tel:${restaurant.phone}`") {{ restaurant.display_phone }}
+      .image-holder(@click="next")
+        img(:src="restaurant.image_url")
   button(v-if="restaurant !== undefined" @click="newSearch") New Search
 </template>
 <style lang="postcss" scoped>

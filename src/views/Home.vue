@@ -37,16 +37,16 @@ let Home = {
     getLocation() {
       const vm = this
       this.processing = true
-      return new Promise(function (resolve, reject) {
+      return new Promise(function(resolve, reject) {
         navigator.geolocation.getCurrentPosition(resolve, reject)
       })
-        .then((resolve) => {
+        .then(resolve => {
           vm.latitude = resolve.coords.latitude
           vm.longitude = resolve.coords.longitude
           vm.location = { latitude: vm.latitude, longitude: vm.longitude }
           vm.reverseGeo()
         })
-        .catch((_reject) => {
+        .catch(_reject => {
           if (!this.manualInput) {
             window.alert('Could not find your location')
             this.manualInput = true
@@ -64,7 +64,7 @@ let Home = {
             key: vm.key,
           },
         })
-        .then(function (response) {
+        .then(function(response) {
           console.log(response)
           const result = response.data.results[0]
           vm.latitude = result.geometry.location.lat
@@ -81,7 +81,7 @@ let Home = {
             key: vm.key,
           },
         })
-        .then(function (response) {
+        .then(function(response) {
           console.log(response)
           vm.formattedLocation =
             response.data.results[4].address_components[0].long_name +
@@ -91,9 +91,12 @@ let Home = {
         })
     },
     updateLocation(location) {
+      this.processing = true
       this.formattedLocation = location
       this.location = location
       this.getLatLong(location)
+      this.manualInput = false
+      this.processing = false
     },
     addCategory(alias, index) {
       this.selectedCategories.push(alias)
@@ -132,7 +135,7 @@ let Home = {
             Authorization: `Bearer ${vm.yelp}`,
           },
         })
-        .then((response) => {
+        .then(response => {
           if (response.data.businesses.length && response.data.businesses[0].image_url !== '') {
             vm.restaurant.push(response.data.businesses[0])
             vm.image = response.data.businesses[0].image_url
@@ -141,7 +144,7 @@ let Home = {
             vm.stackDeck
           }
         })
-        .catch(function (error) {
+        .catch(function(error) {
           vm.processing = false
           console.log(error)
         })
@@ -153,7 +156,7 @@ let Home = {
       vm.suggestions = []
       search ? (this.search = search) : {}
       vm.showCards = true
-      vm.search.categories.map((x) => categoryArray.push(x.alias))
+      vm.search.categories.map(x => categoryArray.push(x.alias))
       vm.categoryString = categoryArray.join(',')
       return axios
         .get(vm.api, {
@@ -166,13 +169,13 @@ let Home = {
             Authorization: `Bearer ${vm.yelp}`,
           },
         })
-        .then(function (response) {
+        .then(function(response) {
           if (response.data.total === 0) {
             vm.$router.push({ name: 'search' })
             window.alert('no matches found')
           }
           response.data.total >= 1000 ? (vm.totalRestaurants = 999) : (vm.totalRestaurants = response.data.total)
-          const offset = Math.floor(Math.random() * vm.totalRestaurants + 1)
+          const offset = vm.totalRestaurants !== 1 ? Math.floor(Math.random() * vm.totalRestaurants + 1) : 0
           return axios.get(vm.api, {
             params: {
               ...vm.location,
@@ -186,16 +189,16 @@ let Home = {
             },
           })
         })
-        .then((response) => {
+        .then(response => {
           if (response.data.businesses.length && response.data.businesses[0].image_url !== '') {
             vm.restaurant.push(response.data.businesses[0])
             vm.image = response.data.businesses[0].image_url
             vm.processing = false
           } else {
-            vm.searchYelp
+            vm.searchYelp()
           }
         })
-        .catch(function (error) {
+        .catch(function(error) {
           vm.processing = false
           console.log(error)
         })
@@ -203,7 +206,7 @@ let Home = {
   },
   watch: {
     restaurant: {
-      handler: function (val, _oldVal) {
+      handler: function(val, _oldVal) {
         if (val.length >= 1 && val.length <= 5) this.stackDeck()
       },
     },
@@ -246,7 +249,7 @@ export default Home
     @next='nextCard',
     :params='{ selectedCategories, manualInput, restaurant, processing, formattedLocation }'
   ) 
-  .suggestions
+  .suggestions(v-if="!manualInput")
     template(v-for='(suggestion, index) in suggestions')
       .pill.hover(@click='addCategory(suggestion, index)') {{ suggestion.title }}
 </template>
