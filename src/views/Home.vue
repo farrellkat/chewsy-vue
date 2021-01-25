@@ -237,7 +237,6 @@ export default Home
 <template lang="pug">
 .home.vp-panel.vp-pad
   .title-background 
-    .text Chewsy
   router-view(
     @search='(val) => searchYelp(val)',
     @newSearch='newSearch',
@@ -267,7 +266,6 @@ export default Home
     display: flex;
     justify-content: space-around;
     padding: 0 0.25rem;
-    margin: auto;
     border-radius: 15px;
     flex-wrap: wrap;
     overflow: scroll;

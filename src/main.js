@@ -7,6 +7,7 @@ import VueTidyRoutes from 'vue-tidyroutes'
 import VueRouter from 'vue-router'
 import AnimateCSS from 'animate.css'
 import VueTouchEvents from 'vue2-touch-events'
+import VShowSlide from 'v-show-slide'
 import '@/components/index'
 import '@/theme/site.css'
 
@@ -18,6 +19,11 @@ Vue.use(VueAxios, axios)
 Vue.use(VueRouter)
 Vue.use(AnimateCSS)
 Vue.use(VueTouchEvents)
+Vue.use(VShowSlide, {
+  customEasing: {
+    exampleEasing: 'cubic-bezier(0.68, -0.55, 0.265, 1.55)',
+  },
+})
 
 Vue.directive('lowercase', {
   update: function(el) {

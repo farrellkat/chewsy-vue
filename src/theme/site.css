@@ -37,6 +37,7 @@ button {
   font-weight: normal;
   font-size: 1rem;
   background-color: white;
+  outline: none;
 }
 button.pink:hover {
   background-color: pink;
@@ -46,7 +47,7 @@ button.pink:hover {
 }
 .pill {
   padding: 1rem;
-  margin-bottom: 0.5rem;
+  margin: 0 0.5rem 0.5rem 0;
   background-color: pink;
   border-radius: 20px;
   text-align: center;
@@ -129,7 +130,7 @@ button.pink:hover {
   }
 }
 
-@media (min-width: 400px) { 
+/* @media (min-width: 400px) { 
   .vp-pad {
     padding: 2rem 1rem;
   } 
@@ -142,7 +143,7 @@ button.pink:hover {
   .pill {
     width: auto;
   }
-}
+} */
 
 /* Medium devices (tablets, 768px and up) */
 @media (min-width: 768px) {  

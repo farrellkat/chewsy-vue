@@ -21,6 +21,9 @@ export default {
 .default {
   border-radius: 15px;
   height: inherit;
+  width: 30rem;
+  margin: auto;
+  overflow: hidden;
 }
 .default.darken {
   background-color: var(--dark-blue);

@@ -2,7 +2,9 @@
 export default {
   name: 'card-view',
   data() {
-    return {}
+    return {
+      showInfo: false,
+    }
   },
   methods: {
     next() {
@@ -24,11 +26,13 @@ export default {
   .vp-panel.white
     .loading(v-if="restaurant === undefined") Loading...
     .restaurant-info(v-if="restaurant") 
-      h1.name {{ restaurant.name }}
-      .price Price: {{ restaurant.price}}
-      .address
-        span(v-for="address in restaurant.location.display_address") {{ address }}
-        a(:href="`tel:${restaurant.phone}`") {{ restaurant.display_phone }}
+      button.more-info(@click="showInfo = !showInfo") More info
+      .info-card(v-show-slide:600:example-easing="showInfo")
+        h1.name {{ restaurant.name }}
+        .price Price: {{ restaurant.price}}
+        .address
+          span(v-for="address in restaurant.location.display_address") {{ address }}
+          a(:href="`tel:${restaurant.phone}`") {{ restaurant.display_phone }}
       .image-holder(@click="next")
         img(:src="restaurant.image_url")
   button(v-if="restaurant !== undefined" @click="newSearch") New Search
@@ -49,6 +53,9 @@ export default {
     background-color: white;
     border-radius: 15px;
     margin-bottom: 1rem;
+    & button.more-info {
+      margin-bottom: 1rem;
+    }
     & .image-holder {
       border-radius: 15px;
       width: inherit;
