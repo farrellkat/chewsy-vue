@@ -21,7 +21,7 @@
     "axios": "^0.21.1",
     "core-js": "^3.6.4",
     "html2pug": "^4.0.0",
-    "postcss": "^7.0.27",
+    "postcss": "^8.2.10",
     "postcss-preset-env": "^6.7.0",
     "pug": "^2.0.4",
     "pug-plain-loader": "^1.0.0",
